@@ -29,11 +29,11 @@ const Dashboard = () => {
   }, [navigate]);
 
   if (!user) {
-    return <div>Carregando...</div>;
+    return <div className="dark:bg-[#2b2d31] dark:text-[#F6F6F6]">Carregando...</div>;
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#2b2d31]">
       <OperatorNavbar user={user} />
       
       <div className="pt-16">
@@ -43,12 +43,13 @@ const Dashboard = () => {
           
           {/* View Mode Toggle */}
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-slate-900">Chamados</h2>
+            <h2 className="text-2xl font-bold text-slate-900 dark:text-[#F6F6F6]">Chamados</h2>
             <div className="flex items-center space-x-2">
               <Button
                 variant={viewMode === 'kanban' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setViewMode('kanban')}
+                className="dark:text-[#F6F6F6]"
               >
                 <LayoutGrid className="h-4 w-4 mr-2" />
                 Kanban
@@ -57,6 +58,7 @@ const Dashboard = () => {
                 variant={viewMode === 'list' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setViewMode('list')}
+                className="dark:text-[#F6F6F6]"
               >
                 <List className="h-4 w-4 mr-2" />
                 Lista

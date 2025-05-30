@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Bell, Search, User, Menu, X, LogOut, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { DarkModeToggle } from '@/components/DarkModeToggle';
 
 interface OperatorNavbarProps {
   user: {
@@ -26,7 +27,7 @@ export const OperatorNavbar = ({ user }: OperatorNavbarProps) => {
   };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-b border-slate-200 z-50">
+    <nav className="fixed top-0 left-0 right-0 bg-white/95 dark:bg-[#2b2d31]/95 backdrop-blur-sm border-b border-slate-200 dark:border-slate-700 z-50">
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
@@ -35,8 +36,8 @@ export const OperatorNavbar = ({ user }: OperatorNavbarProps) => {
               <span className="text-white font-bold text-sm">CD</span>
             </div>
             <div>
-              <h1 className="text-xl font-bold text-slate-900">CoreDesk</h1>
-              <p className="text-xs text-slate-500">Painel do {getRoleLabel(user.role)}</p>
+              <h1 className="text-xl font-bold text-slate-900 dark:text-[#F6F6F6]">CoreDesk</h1>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Painel do {getRoleLabel(user.role)}</p>
             </div>
           </div>
 
@@ -46,30 +47,31 @@ export const OperatorNavbar = ({ user }: OperatorNavbarProps) => {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 h-4 w-4" />
               <Input 
                 placeholder="Buscar chamados..." 
-                className="pl-10 bg-slate-50 border-slate-200 focus:border-blue-500"
+                className="pl-10 bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-600 focus:border-blue-500 dark:text-[#F6F6F6]"
               />
             </div>
           </div>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-4">
-            <Button variant="ghost" size="sm">Dashboard</Button>
-            <Button variant="ghost" size="sm">Chamados</Button>
+            <Button variant="ghost" size="sm" className="dark:text-[#F6F6F6] dark:hover:bg-slate-700">Dashboard</Button>
+            <Button variant="ghost" size="sm" className="dark:text-[#F6F6F6] dark:hover:bg-slate-700">Chamados</Button>
             {user.role === 'manager' && (
-              <Button variant="ghost" size="sm">Relatórios</Button>
+              <Button variant="ghost" size="sm" className="dark:text-[#F6F6F6] dark:hover:bg-slate-700">Relatórios</Button>
             )}
-            <Button variant="ghost" size="sm" className="relative">
+            <Button variant="ghost" size="sm" className="relative dark:text-[#F6F6F6] dark:hover:bg-slate-700">
               <Bell className="h-4 w-4" />
               <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">3</span>
             </Button>
-            <Button variant="ghost" size="sm">
+            <Button variant="ghost" size="sm" className="dark:text-[#F6F6F6] dark:hover:bg-slate-700">
               <Settings className="h-4 w-4" />
             </Button>
-            <div className="flex items-center space-x-2 px-3 py-1 bg-slate-100 rounded-full">
-              <User className="h-4 w-4 text-slate-600" />
-              <span className="text-sm font-medium text-slate-700">{user.username}</span>
+            <DarkModeToggle />
+            <div className="flex items-center space-x-2 px-3 py-1 bg-slate-100 dark:bg-slate-700 rounded-full">
+              <User className="h-4 w-4 text-slate-600 dark:text-slate-300" />
+              <span className="text-sm font-medium text-slate-700 dark:text-[#F6F6F6]">{user.username}</span>
             </div>
-            <Button variant="ghost" size="sm" onClick={handleLogout}>
+            <Button variant="ghost" size="sm" onClick={handleLogout} className="dark:text-[#F6F6F6] dark:hover:bg-slate-700">
               <LogOut className="h-4 w-4" />
             </Button>
           </div>
@@ -78,7 +80,7 @@ export const OperatorNavbar = ({ user }: OperatorNavbarProps) => {
           <Button 
             variant="ghost" 
             size="sm" 
-            className="md:hidden"
+            className="md:hidden dark:text-[#F6F6F6]"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
           >
             {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -87,28 +89,31 @@ export const OperatorNavbar = ({ user }: OperatorNavbarProps) => {
 
         {/* Mobile Navigation */}
         {isMenuOpen && (
-          <div className="md:hidden py-4 border-t border-slate-200">
+          <div className="md:hidden py-4 border-t border-slate-200 dark:border-slate-700">
             <div className="space-y-2">
               <div className="px-2 py-2">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 h-4 w-4" />
                   <Input 
                     placeholder="Buscar..." 
-                    className="pl-10 bg-slate-50"
+                    className="pl-10 bg-slate-50 dark:bg-slate-800 dark:text-[#F6F6F6]"
                   />
                 </div>
               </div>
-              <Button variant="ghost" className="w-full justify-start">Dashboard</Button>
-              <Button variant="ghost" className="w-full justify-start">Chamados</Button>
+              <Button variant="ghost" className="w-full justify-start dark:text-[#F6F6F6] dark:hover:bg-slate-700">Dashboard</Button>
+              <Button variant="ghost" className="w-full justify-start dark:text-[#F6F6F6] dark:hover:bg-slate-700">Chamados</Button>
               {user.role === 'manager' && (
-                <Button variant="ghost" className="w-full justify-start">Relatórios</Button>
+                <Button variant="ghost" className="w-full justify-start dark:text-[#F6F6F6] dark:hover:bg-slate-700">Relatórios</Button>
               )}
-              <Button variant="ghost" className="w-full justify-start">Notificações</Button>
-              <Button variant="ghost" className="w-full justify-start">Configurações</Button>
-              <div className="px-3 py-2 text-sm text-slate-600">
-                Logado como: <span className="font-medium">{user.username}</span>
+              <Button variant="ghost" className="w-full justify-start dark:text-[#F6F6F6] dark:hover:bg-slate-700">Notificações</Button>
+              <Button variant="ghost" className="w-full justify-start dark:text-[#F6F6F6] dark:hover:bg-slate-700">Configurações</Button>
+              <div className="flex items-center justify-between px-3 py-2">
+                <span className="text-sm text-slate-600 dark:text-slate-400">
+                  Logado como: <span className="font-medium dark:text-[#F6F6F6]">{user.username}</span>
+                </span>
+                <DarkModeToggle />
               </div>
-              <Button variant="ghost" className="w-full justify-start text-red-600" onClick={handleLogout}>
+              <Button variant="ghost" className="w-full justify-start text-red-600 dark:text-red-400" onClick={handleLogout}>
                 <LogOut className="h-4 w-4 mr-2" />
                 Sair
               </Button>
