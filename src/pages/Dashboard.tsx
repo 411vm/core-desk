@@ -5,8 +5,8 @@ import { OperatorNavbar } from '@/components/operator/OperatorNavbar';
 import { DashboardStats } from '@/components/operator/DashboardStats';
 import { TicketsKanban } from '@/components/operator/TicketsKanban';
 import { TicketsList } from '@/components/operator/TicketsList';
-import { Button } from '@/components/ui/button';
-import { LayoutGrid, List } from 'lucide-react';
+import { DashboardTickets } from '@/components/operator/DashboardTickets';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const Dashboard = () => {
   const [user, setUser] = useState<any>(null);
@@ -38,40 +38,68 @@ const Dashboard = () => {
       
       <div className="pt-16">
         <div className="max-w-7xl mx-auto px-4 py-6">
-          {/* Dashboard Stats */}
-          <DashboardStats userRole={user.role} />
-          
-          {/* View Mode Toggle */}
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-slate-900 dark:text-[#F6F6F6]">Chamados</h2>
-            <div className="flex items-center space-x-2">
-              <Button
-                variant={viewMode === 'kanban' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setViewMode('kanban')}
-                className="dark:text-[#F6F6F6]"
-              >
-                <LayoutGrid className="h-4 w-4 mr-2" />
-                Kanban
-              </Button>
-              <Button
-                variant={viewMode === 'list' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setViewMode('list')}
-                className="dark:text-[#F6F6F6]"
-              >
-                <List className="h-4 w-4 mr-2" />
-                Lista
-              </Button>
-            </div>
-          </div>
+          <Tabs defaultValue="dashboard" className="w-full">
+            <TabsList className="grid w-full grid-cols-2 dark:bg-[#2b2d31] dark:text-[#F6F6F6]">
+              <TabsTrigger value="dashboard" className="dark:text-[#F6F6F6] dark:data-[state=active]:bg-slate-700">
+                Dashboard
+              </TabsTrigger>
+              <TabsTrigger value="tickets" className="dark:text-[#F6F6F6] dark:data-[state=active]:bg-slate-700">
+                Chamados
+              </TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="dashboard" className="space-y-6">
+              {/* Dashboard Stats */}
+              <DashboardStats userRole={user.role} />
+              
+              {/* Dashboard Tickets - apenas novos ou com retorno do cliente */}
+              <div className="space-y-4">
+                <h2 className="text-2xl font-bold text-slate-900 dark:text-[#F6F6F6]">
+                  Chamados Recentes
+                </h2>
+                <p className="text-slate-600 dark:text-slate-300">
+                  Novos chamados e chamados com retorno do cliente
+                </p>
+                <DashboardTickets userRole={user.role} />
+              </div>
+            </TabsContent>
 
-          {/* Tickets View */}
-          {viewMode === 'kanban' ? (
-            <TicketsKanban userRole={user.role} />
-          ) : (
-            <TicketsList userRole={user.role} />
-          )}
+            <TabsContent value="tickets" className="space-y-6">
+              {/* View Mode Toggle */}
+              <div className="flex items-center justify-between">
+                <h2 className="text-2xl font-bold text-slate-900 dark:text-[#F6F6F6]">Todos os Chamados</h2>
+                <div className="flex items-center space-x-2">
+                  <button
+                    onClick={() => setViewMode('kanban')}
+                    className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                      viewMode === 'kanban'
+                        ? 'bg-blue-500 text-white'
+                        : 'bg-slate-200 text-slate-700 hover:bg-slate-300 dark:bg-slate-700 dark:text-[#F6F6F6] dark:hover:bg-slate-600'
+                    }`}
+                  >
+                    Kanban
+                  </button>
+                  <button
+                    onClick={() => setViewMode('list')}
+                    className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                      viewMode === 'list'
+                        ? 'bg-blue-500 text-white'
+                        : 'bg-slate-200 text-slate-700 hover:bg-slate-300 dark:bg-slate-700 dark:text-[#F6F6F6] dark:hover:bg-slate-600'
+                    }`}
+                  >
+                    Lista
+                  </button>
+                </div>
+              </div>
+
+              {/* Tickets View */}
+              {viewMode === 'kanban' ? (
+                <TicketsKanban userRole={user.role} />
+              ) : (
+                <TicketsList userRole={user.role} />
+              )}
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
     </div>
