@@ -6,10 +6,10 @@ import { DashboardStats } from '@/components/operator/DashboardStats';
 import { TicketsKanban } from '@/components/operator/TicketsKanban';
 import { TicketsList } from '@/components/operator/TicketsList';
 import { DashboardTickets } from '@/components/operator/DashboardTickets';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const Dashboard = () => {
   const [user, setUser] = useState<any>(null);
+  const [currentSection, setCurrentSection] = useState<'dashboard' | 'tickets'>('dashboard');
   const [viewMode, setViewMode] = useState<'kanban' | 'list'>('kanban');
   const navigate = useNavigate();
 
@@ -34,21 +34,16 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-[#2b2d31]">
-      <OperatorNavbar user={user} />
+      <OperatorNavbar 
+        user={user} 
+        currentSection={currentSection}
+        onSectionChange={setCurrentSection}
+      />
       
       <div className="pt-16">
         <div className="max-w-7xl mx-auto px-4 py-6">
-          <Tabs defaultValue="dashboard" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 dark:bg-[#2b2d31] dark:text-[#F6F6F6]">
-              <TabsTrigger value="dashboard" className="dark:text-[#F6F6F6] dark:data-[state=active]:bg-slate-700">
-                Dashboard
-              </TabsTrigger>
-              <TabsTrigger value="tickets" className="dark:text-[#F6F6F6] dark:data-[state=active]:bg-slate-700">
-                Chamados
-              </TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="dashboard" className="space-y-6">
+          {currentSection === 'dashboard' && (
+            <div className="space-y-6">
               {/* Dashboard Stats */}
               <DashboardStats userRole={user.role} />
               
@@ -62,9 +57,11 @@ const Dashboard = () => {
                 </p>
                 <DashboardTickets userRole={user.role} />
               </div>
-            </TabsContent>
+            </div>
+          )}
 
-            <TabsContent value="tickets" className="space-y-6">
+          {currentSection === 'tickets' && (
+            <div className="space-y-6">
               {/* View Mode Toggle */}
               <div className="flex items-center justify-between">
                 <h2 className="text-2xl font-bold text-slate-900 dark:text-[#F6F6F6]">Todos os Chamados</h2>
@@ -98,8 +95,8 @@ const Dashboard = () => {
               ) : (
                 <TicketsList userRole={user.role} />
               )}
-            </TabsContent>
-          </Tabs>
+            </div>
+          )}
         </div>
       </div>
     </div>

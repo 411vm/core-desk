@@ -11,9 +11,11 @@ interface OperatorNavbarProps {
     username: string;
     role: string;
   };
+  currentSection: 'dashboard' | 'tickets';
+  onSectionChange: (section: 'dashboard' | 'tickets') => void;
 }
 
-export const OperatorNavbar = ({ user }: OperatorNavbarProps) => {
+export const OperatorNavbar = ({ user, currentSection, onSectionChange }: OperatorNavbarProps) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const navigate = useNavigate();
 
@@ -54,8 +56,26 @@ export const OperatorNavbar = ({ user }: OperatorNavbarProps) => {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-4">
-            <Button variant="ghost" size="sm" className="dark:text-[#F6F6F6] dark:hover:bg-slate-700">Dashboard</Button>
-            <Button variant="ghost" size="sm" className="dark:text-[#F6F6F6] dark:hover:bg-slate-700">Chamados</Button>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className={`dark:text-[#F6F6F6] dark:hover:bg-slate-700 ${
+                currentSection === 'dashboard' ? 'bg-slate-100 dark:bg-slate-700' : ''
+              }`}
+              onClick={() => onSectionChange('dashboard')}
+            >
+              Dashboard
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className={`dark:text-[#F6F6F6] dark:hover:bg-slate-700 ${
+                currentSection === 'tickets' ? 'bg-slate-100 dark:bg-slate-700' : ''
+              }`}
+              onClick={() => onSectionChange('tickets')}
+            >
+              Chamados
+            </Button>
             {user.role === 'manager' && (
               <Button variant="ghost" size="sm" className="dark:text-[#F6F6F6] dark:hover:bg-slate-700">Relatórios</Button>
             )}
@@ -100,8 +120,30 @@ export const OperatorNavbar = ({ user }: OperatorNavbarProps) => {
                   />
                 </div>
               </div>
-              <Button variant="ghost" className="w-full justify-start dark:text-[#F6F6F6] dark:hover:bg-slate-700">Dashboard</Button>
-              <Button variant="ghost" className="w-full justify-start dark:text-[#F6F6F6] dark:hover:bg-slate-700">Chamados</Button>
+              <Button 
+                variant="ghost" 
+                className={`w-full justify-start dark:text-[#F6F6F6] dark:hover:bg-slate-700 ${
+                  currentSection === 'dashboard' ? 'bg-slate-100 dark:bg-slate-700' : ''
+                }`}
+                onClick={() => {
+                  onSectionChange('dashboard');
+                  setIsMenuOpen(false);
+                }}
+              >
+                Dashboard
+              </Button>
+              <Button 
+                variant="ghost" 
+                className={`w-full justify-start dark:text-[#F6F6F6] dark:hover:bg-slate-700 ${
+                  currentSection === 'tickets' ? 'bg-slate-100 dark:bg-slate-700' : ''
+                }`}
+                onClick={() => {
+                  onSectionChange('tickets');
+                  setIsMenuOpen(false);
+                }}
+              >
+                Chamados
+              </Button>
               {user.role === 'manager' && (
                 <Button variant="ghost" className="w-full justify-start dark:text-[#F6F6F6] dark:hover:bg-slate-700">Relatórios</Button>
               )}
