@@ -11,6 +11,7 @@ const Dashboard = () => {
   const [user, setUser] = useState<any>(null);
   const [currentSection, setCurrentSection] = useState<'dashboard' | 'tickets'>('dashboard');
   const [viewMode, setViewMode] = useState<'kanban' | 'list'>('kanban');
+  const [prefilterStatus, setPrefilterStatus] = useState<string | undefined>(undefined);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -28,6 +29,12 @@ const Dashboard = () => {
     }
   }, [navigate]);
 
+  const handleNavigateToTickets = (status: string) => {
+    setCurrentSection('tickets');
+    setViewMode('list');
+    setPrefilterStatus(status);
+  };
+
   if (!user) {
     return <div className="dark:bg-[#2b2d31] dark:text-[#F6F6F6]">Carregando...</div>;
   }
@@ -37,7 +44,12 @@ const Dashboard = () => {
       <OperatorNavbar 
         user={user} 
         currentSection={currentSection}
-        onSectionChange={setCurrentSection}
+        onSectionChange={(section) => {
+          setCurrentSection(section);
+          if (section === 'tickets') {
+            setPrefilterStatus(undefined);
+          }
+        }}
       />
       
       <div className="pt-16">
@@ -45,7 +57,7 @@ const Dashboard = () => {
           {currentSection === 'dashboard' && (
             <div className="space-y-6">
               {/* Dashboard Stats */}
-              <DashboardStats userRole={user.role} />
+              <DashboardStats userRole={user.role} onNavigateToTickets={handleNavigateToTickets} />
               
               {/* Dashboard Tickets - apenas novos ou com retorno do cliente */}
               <div className="space-y-4">
@@ -91,9 +103,9 @@ const Dashboard = () => {
 
               {/* Tickets View */}
               {viewMode === 'kanban' ? (
-                <TicketsKanban userRole={user.role} />
+                <TicketsKanban userRole={user.role} prefilterStatus={prefilterStatus} />
               ) : (
-                <TicketsList userRole={user.role} />
+                <TicketsList userRole={user.role} prefilterStatus={prefilterStatus} />
               )}
             </div>
           )}

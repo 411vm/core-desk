@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,6 +9,7 @@ import { TicketDetailModal } from './TicketDetailModal';
 
 interface TicketsListProps {
   userRole: string;
+  prefilterStatus?: string;
 }
 
 interface Ticket {
@@ -26,12 +27,19 @@ interface Ticket {
   description: string;
 }
 
-export const TicketsList = ({ userRole }: TicketsListProps) => {
+export const TicketsList = ({ userRole, prefilterStatus }: TicketsListProps) => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState(prefilterStatus || 'all');
   const [priorityFilter, setPriorityFilter] = useState('all');
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Apply prefilter when prop changes
+  useEffect(() => {
+    if (prefilterStatus) {
+      setStatusFilter(prefilterStatus);
+    }
+  }, [prefilterStatus]);
 
   const [tickets, setTickets] = useState<Ticket[]>([
     {
@@ -178,7 +186,7 @@ export const TicketsList = ({ userRole }: TicketsListProps) => {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-3 py-2 border border-slate-200 rounded-md text-sm"
+              className="px-3 py-2 border border-slate-200 rounded-md text-sm dark:bg-slate-800 dark:border-slate-600 dark:text-[#F6F6F6]"
             >
               <option value="all">Todos os Status</option>
               <option value="Novo">Novo</option>
@@ -190,7 +198,7 @@ export const TicketsList = ({ userRole }: TicketsListProps) => {
             <select
               value={priorityFilter}
               onChange={(e) => setPriorityFilter(e.target.value)}
-              className="px-3 py-2 border border-slate-200 rounded-md text-sm"
+              className="px-3 py-2 border border-slate-200 rounded-md text-sm dark:bg-slate-800 dark:border-slate-600 dark:text-[#F6F6F6]"
             >
               <option value="all">Todas as Prioridades</option>
               <option value="urgent">Urgente</option>
