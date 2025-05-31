@@ -1,9 +1,10 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Clock, User, MessageSquare, Paperclip, MoreHorizontal } from 'lucide-react';
+import { Clock, User, MessageSquare, Paperclip, MoreHorizontal, ChevronRight } from 'lucide-react';
+import { TicketDetailModal } from './TicketDetailModal';
 
 interface DashboardTicketsProps {
   userRole: string;
@@ -22,10 +23,13 @@ interface Ticket {
   attachments: number;
   status: string;
   hasCustomerReply: boolean;
+  updatedAt: string;
 }
 
 export const DashboardTickets = ({ userRole }: DashboardTicketsProps) => {
-  const mockTickets: Ticket[] = [
+  const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [tickets, setTickets] = useState<Ticket[]>([
     {
       id: '#2024-001',
       title: 'Problema com acesso ao email',
@@ -37,8 +41,9 @@ export const DashboardTickets = ({ userRole }: DashboardTicketsProps) => {
       createdAt: '2h',
       responses: 0,
       attachments: 1,
-      status: 'new',
-      hasCustomerReply: false
+      status: 'Novo',
+      hasCustomerReply: false,
+      updatedAt: '2024-01-15 14:30'
     },
     {
       id: '#2024-002', 
@@ -51,8 +56,9 @@ export const DashboardTickets = ({ userRole }: DashboardTicketsProps) => {
       createdAt: '1h',
       responses: 0,
       attachments: 0,
-      status: 'new',
-      hasCustomerReply: false
+      status: 'Novo',
+      hasCustomerReply: false,
+      updatedAt: '2024-01-15 15:45'
     },
     {
       id: '#2024-006',
@@ -65,8 +71,9 @@ export const DashboardTickets = ({ userRole }: DashboardTicketsProps) => {
       createdAt: '30min',
       responses: 2,
       attachments: 0,
-      status: 'inProgress',
-      hasCustomerReply: true
+      status: 'Em Andamento',
+      hasCustomerReply: true,
+      updatedAt: '2024-01-15 16:30'
     },
     {
       id: '#2024-007',
@@ -79,15 +86,29 @@ export const DashboardTickets = ({ userRole }: DashboardTicketsProps) => {
       createdAt: '15min',
       responses: 0,
       attachments: 1,
-      status: 'new',
-      hasCustomerReply: false
+      status: 'Novo',
+      hasCustomerReply: false,
+      updatedAt: '2024-01-15 17:00'
     }
-  ];
+  ]);
 
   // Filtrar apenas chamados novos ou com retorno do cliente
-  const filteredTickets = mockTickets.filter(ticket => 
-    ticket.status === 'new' || ticket.hasCustomerReply
+  const filteredTickets = tickets.filter(ticket => 
+    ticket.status === 'Novo' || ticket.hasCustomerReply
   );
+
+  const handleTicketClick = (ticket: Ticket) => {
+    setSelectedTicket(ticket);
+    setIsModalOpen(true);
+  };
+
+  const handleUpdateTicket = (ticketId: string, updates: Partial<Ticket>) => {
+    setTickets(prevTickets =>
+      prevTickets.map(ticket =>
+        ticket.id === ticketId ? { ...ticket, ...updates } : ticket
+      )
+    );
+  };
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
@@ -110,83 +131,104 @@ export const DashboardTickets = ({ userRole }: DashboardTicketsProps) => {
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      {filteredTickets.map((ticket) => (
-        <Card key={ticket.id} className="p-4 hover:shadow-md transition-shadow cursor-pointer dark:bg-slate-800 dark:border-slate-700">
-          {/* Ticket Header */}
-          <div className="flex items-start justify-between mb-2">
-            <div>
-              <p className="text-sm font-medium text-slate-900 dark:text-[#F6F6F6]">{ticket.id}</p>
-              <div className="flex items-center space-x-2 mt-1">
-                <Badge className={`text-xs ${getPriorityColor(ticket.priority)}`}>
-                  {getPriorityLabel(ticket.priority)}
-                </Badge>
-                {ticket.hasCustomerReply && (
-                  <Badge className="text-xs bg-blue-100 text-blue-800 border-blue-200">
-                    Retorno Cliente
+    <>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {filteredTickets.map((ticket) => (
+          <Card 
+            key={ticket.id} 
+            className="p-4 hover:shadow-md transition-all cursor-pointer group dark:bg-slate-800 dark:border-slate-700 hover:scale-102"
+            onClick={() => handleTicketClick(ticket)}
+          >
+            {/* Ticket Header */}
+            <div className="flex items-start justify-between mb-2">
+              <div>
+                <p className="text-sm font-medium text-slate-900 dark:text-[#F6F6F6]">{ticket.id}</p>
+                <div className="flex items-center space-x-2 mt-1">
+                  <Badge className={`text-xs ${getPriorityColor(ticket.priority)}`}>
+                    {getPriorityLabel(ticket.priority)}
                   </Badge>
-                )}
-              </div>
-            </div>
-            <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </div>
-
-          {/* Ticket Content */}
-          <h4 className="font-medium text-slate-900 dark:text-[#F6F6F6] mb-2 line-clamp-2">
-            {ticket.title}
-          </h4>
-          <p className="text-sm text-slate-600 dark:text-slate-300 mb-3 line-clamp-2">
-            {ticket.description}
-          </p>
-
-          {/* Ticket Meta */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
-              <span>{ticket.category}</span>
-              <div className="flex items-center">
-                <Clock className="h-3 w-3 mr-1" />
-                {ticket.createdAt}
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div className="flex items-center text-xs text-slate-600 dark:text-slate-300">
-                <User className="h-3 w-3 mr-1" />
-                {ticket.requester}
-              </div>
-              <div className="flex items-center space-x-2">
-                {ticket.responses > 0 && (
-                  <div className="flex items-center text-xs text-slate-500 dark:text-slate-400">
-                    <MessageSquare className="h-3 w-3 mr-1" />
-                    {ticket.responses}
-                  </div>
-                )}
-                {ticket.attachments > 0 && (
-                  <div className="flex items-center text-xs text-slate-500 dark:text-slate-400">
-                    <Paperclip className="h-3 w-3 mr-1" />
-                    {ticket.attachments}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {ticket.assignee && (
-              <div className="pt-2 border-t border-slate-100 dark:border-slate-700">
-                <div className="flex items-center text-xs text-slate-600 dark:text-slate-300">
-                  <div className="w-5 h-5 bg-blue-100 rounded-full flex items-center justify-center mr-2">
-                    <span className="text-blue-600 font-medium">
-                      {ticket.assignee.charAt(0).toUpperCase()}
-                    </span>
-                  </div>
-                  {ticket.assignee}
+                  {ticket.hasCustomerReply && (
+                    <Badge className="text-xs bg-blue-100 text-blue-800 border-blue-200">
+                      Retorno Cliente
+                    </Badge>
+                  )}
                 </div>
               </div>
-            )}
-          </div>
-        </Card>
-      ))}
-    </div>
+              <div className="flex items-center space-x-2">
+                <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+                <div className="group-hover:bg-blue-100 p-1 rounded transition-colors" title="Ver detalhes">
+                  <ChevronRight className="h-4 w-4 text-slate-400 group-hover:text-blue-600" />
+                </div>
+              </div>
+            </div>
+
+            {/* Ticket Content */}
+            <h4 className="font-medium text-slate-900 dark:text-[#F6F6F6] mb-2 line-clamp-2">
+              {ticket.title}
+            </h4>
+            <p className="text-sm text-slate-600 dark:text-slate-300 mb-3 line-clamp-2">
+              {ticket.description}
+            </p>
+
+            {/* Ticket Meta */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+                <span>{ticket.category}</span>
+                <div className="flex items-center">
+                  <Clock className="h-3 w-3 mr-1" />
+                  {ticket.createdAt}
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div className="flex items-center text-xs text-slate-600 dark:text-slate-300">
+                  <User className="h-3 w-3 mr-1" />
+                  {ticket.requester}
+                </div>
+                <div className="flex items-center space-x-2">
+                  {ticket.responses > 0 && (
+                    <div className="flex items-center text-xs text-slate-500 dark:text-slate-400">
+                      <MessageSquare className="h-3 w-3 mr-1" />
+                      {ticket.responses}
+                    </div>
+                  )}
+                  {ticket.attachments > 0 && (
+                    <div className="flex items-center text-xs text-slate-500 dark:text-slate-400">
+                      <Paperclip className="h-3 w-3 mr-1" />
+                      {ticket.attachments}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {ticket.assignee && (
+                <div className="pt-2 border-t border-slate-100 dark:border-slate-700">
+                  <div className="flex items-center text-xs text-slate-600 dark:text-slate-300">
+                    <div className="w-5 h-5 bg-blue-100 rounded-full flex items-center justify-center mr-2">
+                      <span className="text-blue-600 font-medium">
+                        {ticket.assignee.charAt(0).toUpperCase()}
+                      </span>
+                    </div>
+                    {ticket.assignee}
+                  </div>
+                </div>
+              )}
+            </div>
+          </Card>
+        ))}
+      </div>
+
+      <TicketDetailModal
+        ticket={selectedTicket}
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setSelectedTicket(null);
+        }}
+        onUpdateTicket={handleUpdateTicket}
+      />
+    </>
   );
 };

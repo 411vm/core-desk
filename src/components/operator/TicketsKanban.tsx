@@ -20,7 +20,9 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Clock, User, MessageSquare, Paperclip, AlertTriangle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Clock, User, MessageSquare, Paperclip, AlertTriangle, Search, Filter } from 'lucide-react';
 import { TicketDetailModal } from './TicketDetailModal';
 
 interface TicketsKanbanProps {
@@ -162,6 +164,9 @@ const SortableTicketCard = ({ ticket, onClick }: SortableTicketCardProps) => {
 export const TicketsKanban = ({ userRole, prefilterStatus }: TicketsKanbanProps) => {
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState(prefilterStatus || 'all');
+  const [priorityFilter, setPriorityFilter] = useState('all');
   const [tickets, setTickets] = useState<Ticket[]>([
     {
       id: '#2024-001',
@@ -235,10 +240,24 @@ export const TicketsKanban = ({ userRole, prefilterStatus }: TicketsKanbanProps)
     }
   ]);
 
-  // Filter tickets if prefilter is provided
-  const filteredTickets = prefilterStatus 
-    ? tickets.filter(ticket => ticket.status === prefilterStatus)
-    : tickets;
+  // Apply prefilter when prop changes
+  useEffect(() => {
+    if (prefilterStatus) {
+      setStatusFilter(prefilterStatus);
+    }
+  }, [prefilterStatus]);
+
+  // Filter tickets based on search and filters
+  const filteredTickets = tickets.filter(ticket => {
+    const matchesSearch = ticket.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         ticket.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         ticket.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         ticket.requester.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = statusFilter === 'all' || ticket.status === statusFilter;
+    const matchesPriority = priorityFilter === 'all' || ticket.priority === priorityFilter;
+    
+    return matchesSearch && matchesStatus && matchesPriority;
+  });
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -294,6 +313,52 @@ export const TicketsKanban = ({ userRole, prefilterStatus }: TicketsKanbanProps)
 
   return (
     <>
+      {/* Filters and Search Bar */}
+      <Card className="p-4 mb-6">
+        <div className="flex flex-col md:flex-row gap-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 h-4 w-4" />
+            <Input
+              placeholder="Buscar por ID, título, descrição ou solicitante..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+          
+          <div className="flex gap-2">
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="px-3 py-2 border border-slate-200 rounded-md text-sm dark:bg-slate-800 dark:border-slate-600 dark:text-[#F6F6F6]"
+            >
+              <option value="all">Todos os Status</option>
+              <option value="Novo">Novo</option>
+              <option value="Em Andamento">Em Andamento</option>
+              <option value="Aguardando">Aguardando</option>
+              <option value="Resolvido">Resolvido</option>
+            </select>
+
+            <select
+              value={priorityFilter}
+              onChange={(e) => setPriorityFilter(e.target.value)}
+              className="px-3 py-2 border border-slate-200 rounded-md text-sm dark:bg-slate-800 dark:border-slate-600 dark:text-[#F6F6F6]"
+            >
+              <option value="all">Todas as Prioridades</option>
+              <option value="urgent">Urgente</option>
+              <option value="high">Alta</option>
+              <option value="medium">Média</option>
+              <option value="low">Baixa</option>
+            </select>
+
+            <Button variant="outline" size="sm">
+              <Filter className="h-4 w-4 mr-2" />
+              Filtros
+            </Button>
+          </div>
+        </div>
+      </Card>
+
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}
