@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -7,6 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { User, Clock, MessageSquare, Paperclip, Send } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { PriorityHelper } from './PriorityHelper';
 
 interface Ticket {
   id: string;
@@ -32,11 +32,13 @@ interface TicketDetailModalProps {
 export const TicketDetailModal = ({ ticket, isOpen, onClose, onUpdateTicket }: TicketDetailModalProps) => {
   const [response, setResponse] = useState('');
   const [status, setStatus] = useState(ticket?.status || '');
+  const [priority, setPriority] = useState<'low' | 'medium' | 'high' | 'urgent'>(ticket?.priority || 'medium');
   const { toast } = useToast();
 
   React.useEffect(() => {
     if (ticket) {
       setStatus(ticket.status);
+      setPriority(ticket.priority);
     }
   }, [ticket]);
 
@@ -80,11 +82,19 @@ export const TicketDetailModal = ({ ticket, isOpen, onClose, onUpdateTicket }: T
       });
     }
 
+    const updates: Partial<Ticket> = {};
     if (status !== ticket.status) {
-      onUpdateTicket(ticket.id, { status });
+      updates.status = status;
+    }
+    if (priority !== ticket.priority) {
+      updates.priority = priority;
+    }
+
+    if (Object.keys(updates).length > 0) {
+      onUpdateTicket(ticket.id, updates);
       toast({
-        title: "Status atualizado",
-        description: `Status do chamado alterado para: ${status}`,
+        title: "Chamado atualizado",
+        description: "As alterações foram salvas com sucesso.",
       });
     }
 
@@ -99,6 +109,13 @@ export const TicketDetailModal = ({ ticket, isOpen, onClose, onUpdateTicket }: T
     { value: 'Resolvido', label: 'Resolvido' }
   ];
 
+  const priorityOptions = [
+    { value: 'low', label: 'Baixa' },
+    { value: 'medium', label: 'Média' },
+    { value: 'high', label: 'Alta' },
+    { value: 'urgent', label: 'Urgente' }
+  ];
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -106,8 +123,8 @@ export const TicketDetailModal = ({ ticket, isOpen, onClose, onUpdateTicket }: T
           <DialogTitle className="flex items-center justify-between">
             <span>Detalhes do Chamado {ticket.id}</span>
             <div className="flex items-center space-x-2">
-              <Badge className={`text-xs ${getPriorityColor(ticket.priority)}`}>
-                {getPriorityLabel(ticket.priority)}
+              <Badge className={`text-xs ${getPriorityColor(priority)}`}>
+                {getPriorityLabel(priority)}
               </Badge>
               <Badge className={`text-xs ${getStatusColor(status)}`}>
                 {status}
@@ -122,6 +139,12 @@ export const TicketDetailModal = ({ ticket, isOpen, onClose, onUpdateTicket }: T
             <div>
               <h3 className="font-semibold text-lg mb-2">{ticket.title}</h3>
               <p className="text-slate-600 dark:text-slate-300">{ticket.description}</p>
+              
+              {/* Priority Helper */}
+              <PriorityHelper 
+                description={ticket.description}
+                onPrioritySuggestion={setPriority}
+              />
             </div>
 
             <div className="grid grid-cols-2 gap-4 text-sm">
@@ -163,21 +186,39 @@ export const TicketDetailModal = ({ ticket, isOpen, onClose, onUpdateTicket }: T
             )}
           </div>
 
-          {/* Status Update */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Status do Chamado</label>
-            <Select value={status} onValueChange={setStatus}>
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione o status" />
-              </SelectTrigger>
-              <SelectContent>
-                {statusOptions.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          {/* Status and Priority Updates */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Status do Chamado</label>
+              <Select value={status} onValueChange={setStatus}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione o status" />
+                </SelectTrigger>
+                <SelectContent>
+                  {statusOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Prioridade</label>
+              <Select value={priority} onValueChange={(value: 'low' | 'medium' | 'high' | 'urgent') => setPriority(value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione a prioridade" />
+                </SelectTrigger>
+                <SelectContent>
+                  {priorityOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           {/* Response */}

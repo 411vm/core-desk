@@ -6,12 +6,17 @@ import { DashboardStats } from '@/components/operator/DashboardStats';
 import { TicketsKanban } from '@/components/operator/TicketsKanban';
 import { TicketsList } from '@/components/operator/TicketsList';
 import { DashboardTickets } from '@/components/operator/DashboardTickets';
+import { PeriodFilter } from '@/components/operator/PeriodFilter';
+import { PersonalMetrics } from '@/components/operator/PersonalMetrics';
+import { ActivityFeed } from '@/components/operator/ActivityFeed';
 
 const Dashboard = () => {
   const [user, setUser] = useState<any>(null);
   const [currentSection, setCurrentSection] = useState<'dashboard' | 'tickets'>('dashboard');
   const [viewMode, setViewMode] = useState<'kanban' | 'list'>('kanban');
   const [prefilterStatus, setPrefilterStatus] = useState<string | undefined>(undefined);
+  const [selectedPeriod, setSelectedPeriod] = useState('month');
+  const [selectedOperator, setSelectedOperator] = useState('all');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -35,6 +40,12 @@ const Dashboard = () => {
     setPrefilterStatus(status);
   };
 
+  const handleOpenTicket = (ticketId: string) => {
+    // Mock function - in a real app, this would open the specific ticket
+    console.log('Opening ticket:', ticketId);
+    setCurrentSection('tickets');
+  };
+
   if (!user) {
     return <div className="dark:bg-[#2b2d31] dark:text-[#F6F6F6]">Carregando...</div>;
   }
@@ -55,19 +66,38 @@ const Dashboard = () => {
       <div className="pt-16">
         <div className="max-w-7xl mx-auto px-4 py-6">
           {currentSection === 'dashboard' && (
-            <div className="space-y-6">
-              {/* Dashboard Stats */}
-              <DashboardStats userRole={user.role} onNavigateToTickets={handleNavigateToTickets} />
-              
-              {/* Dashboard Tickets - apenas novos ou com retorno do cliente */}
-              <div className="space-y-4">
-                <h2 className="text-2xl font-bold text-slate-900 dark:text-[#F6F6F6]">
-                  Chamados Recentes
-                </h2>
-                <p className="text-slate-600 dark:text-slate-300">
-                  Novos chamados e chamados com retorno do cliente
-                </p>
-                <DashboardTickets userRole={user.role} />
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+              <div className="lg:col-span-3 space-y-6">
+                {/* Period Filter */}
+                <div className="flex justify-end">
+                  <PeriodFilter period={selectedPeriod} onPeriodChange={setSelectedPeriod} />
+                </div>
+
+                {/* Dashboard Stats */}
+                <DashboardStats userRole={user.role} onNavigateToTickets={handleNavigateToTickets} />
+                
+                {/* Personal Metrics */}
+                <PersonalMetrics 
+                  userRole={user.role}
+                  selectedOperator={selectedOperator}
+                  onOperatorChange={setSelectedOperator}
+                />
+
+                {/* Dashboard Tickets */}
+                <div className="space-y-4">
+                  <h2 className="text-2xl font-bold text-slate-900 dark:text-[#F6F6F6]">
+                    Chamados Recentes
+                  </h2>
+                  <p className="text-slate-600 dark:text-slate-300">
+                    Novos chamados e chamados com retorno do cliente
+                  </p>
+                  <DashboardTickets userRole={user.role} />
+                </div>
+              </div>
+
+              {/* Activity Feed Sidebar */}
+              <div className="lg:col-span-1">
+                <ActivityFeed onOpenTicket={handleOpenTicket} />
               </div>
             </div>
           )}
