@@ -17,6 +17,7 @@ const Dashboard = () => {
   const [prefilterStatus, setPrefilterStatus] = useState<string | undefined>(undefined);
   const [selectedPeriod, setSelectedPeriod] = useState('month');
   const [selectedOperator, setSelectedOperator] = useState('all');
+  const [ticketToOpen, setTicketToOpen] = useState<string | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -41,9 +42,12 @@ const Dashboard = () => {
   };
 
   const handleOpenTicket = (ticketId: string) => {
-    // Mock function - in a real app, this would open the specific ticket
-    console.log('Opening ticket:', ticketId);
+    // Navegar para a aba de chamados e abrir o chamado específico
     setCurrentSection('tickets');
+    setViewMode('list');
+    setTicketToOpen(ticketId);
+    // Filtrar pelo ID do chamado
+    setPrefilterStatus(undefined);
   };
 
   if (!user) {
@@ -59,6 +63,7 @@ const Dashboard = () => {
           setCurrentSection(section);
           if (section === 'tickets') {
             setPrefilterStatus(undefined);
+            setTicketToOpen(null);
           }
         }}
       />
@@ -135,7 +140,12 @@ const Dashboard = () => {
               {viewMode === 'kanban' ? (
                 <TicketsKanban userRole={user.role} prefilterStatus={prefilterStatus} />
               ) : (
-                <TicketsList userRole={user.role} prefilterStatus={prefilterStatus} />
+                <TicketsList 
+                  userRole={user.role} 
+                  prefilterStatus={prefilterStatus}
+                  ticketToOpen={ticketToOpen}
+                  onTicketOpened={() => setTicketToOpen(null)}
+                />
               )}
             </div>
           )}

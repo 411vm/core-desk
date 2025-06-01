@@ -92,7 +92,7 @@ export const ActivityFeed = ({ onOpenTicket }: ActivityFeedProps) => {
         </Button>
       </div>
 
-      <div className="flex gap-2 mb-4">
+      <div className="flex flex-wrap gap-2 mb-4">
         <Button
           variant={filter === 'all' ? 'default' : 'outline'}
           size="sm"
@@ -127,22 +127,22 @@ export const ActivityFeed = ({ onOpenTicket }: ActivityFeedProps) => {
         {filteredActivities.map((activity) => (
           <div key={activity.id} className="border-l-2 border-slate-200 dark:border-slate-700 pl-4 pb-4">
             <div className="flex items-start justify-between">
-              <div className="flex-1">
+              <div className="flex-1 min-w-0">
                 <div className="flex items-center space-x-2 mb-1">
                   <Badge className={`text-xs ${getActivityColor(activity.type)}`}>
                     {getActivityIcon(activity.type)}
                     <span className="ml-1">{getActivityLabel(activity.type)}</span>
                   </Badge>
-                  <span className="text-sm font-medium text-slate-900 dark:text-[#F6F6F6]">
+                  <span className="text-sm font-medium text-slate-900 dark:text-[#F6F6F6] truncate">
                     {activity.author}
                   </span>
                 </div>
                 
-                <p className="text-sm text-slate-600 dark:text-slate-300 mb-2">
+                <p className="text-sm text-slate-600 dark:text-slate-300 mb-2 break-words">
                   {activity.content}
                 </p>
                 
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between flex-wrap gap-2">
                   <span className="text-xs text-slate-500 dark:text-slate-400">
                     {formatDistanceToNow(new Date(activity.timestamp), { 
                       addSuffix: true, 
@@ -153,7 +153,7 @@ export const ActivityFeed = ({ onOpenTicket }: ActivityFeedProps) => {
                     variant="ghost"
                     size="sm"
                     onClick={() => onOpenTicket(activity.ticketId)}
-                    className="text-blue-600 hover:text-blue-800"
+                    className="text-blue-600 hover:text-blue-800 text-xs px-2 py-1 h-6"
                   >
                     {activity.ticketId}
                   </Button>
