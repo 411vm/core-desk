@@ -10,6 +10,8 @@ import { TicketDetailModal } from './TicketDetailModal';
 interface TicketsListProps {
   userRole: string;
   prefilterStatus?: string;
+  ticketToOpen?: string | null;
+  onTicketOpened?: () => void;
 }
 
 interface Ticket {
@@ -27,7 +29,7 @@ interface Ticket {
   description: string;
 }
 
-export const TicketsList = ({ userRole, prefilterStatus }: TicketsListProps) => {
+export const TicketsList = ({ userRole, prefilterStatus, ticketToOpen, onTicketOpened }: TicketsListProps) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState(prefilterStatus || 'all');
   const [priorityFilter, setPriorityFilter] = useState('all');
@@ -40,6 +42,20 @@ export const TicketsList = ({ userRole, prefilterStatus }: TicketsListProps) => 
       setStatusFilter(prefilterStatus);
     }
   }, [prefilterStatus]);
+
+  // Handle ticketToOpen when prop changes
+  useEffect(() => {
+    if (ticketToOpen) {
+      const ticket = tickets.find(t => t.id === ticketToOpen);
+      if (ticket) {
+        setSelectedTicket(ticket);
+        setIsModalOpen(true);
+        if (onTicketOpened) {
+          onTicketOpened();
+        }
+      }
+    }
+  }, [ticketToOpen, onTicketOpened]);
 
   const [tickets, setTickets] = useState<Ticket[]>([
     {
