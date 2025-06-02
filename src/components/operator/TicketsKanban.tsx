@@ -7,6 +7,7 @@ import {
   useSensor,
   useSensors,
   DragEndEvent,
+  useDroppable,
 } from '@dnd-kit/core';
 import {
   arrayMove,
@@ -172,6 +173,54 @@ const SortableTicketCard = ({ ticket, onClick }: SortableTicketCardProps) => {
   );
 };
 
+// New DroppableColumn component
+const DroppableColumn = ({ 
+  column, 
+  tickets, 
+  onTicketClick 
+}: { 
+  column: any;
+  tickets: Ticket[];
+  onTicketClick: (ticket: Ticket, event?: React.MouseEvent) => void;
+}) => {
+  const { setNodeRef } = useDroppable({
+    id: column.id,
+  });
+
+  return (
+    <div key={column.id} className="space-y-4">
+      <div ref={setNodeRef} className={`p-4 rounded-lg border-2 ${column.color} min-h-[400px]`}>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="font-semibold text-slate-900 dark:text-[#F6F6F6]">{column.title}</h3>
+          <span className="text-xs font-medium bg-white dark:bg-slate-700 px-2 py-1 rounded text-slate-600 dark:text-slate-300">
+            {tickets.length}
+          </span>
+        </div>
+
+        <SortableContext
+          items={tickets.map(ticket => ticket.id)}
+          strategy={verticalListSortingStrategy}
+        >
+          <div className="space-y-3 min-h-[200px]">
+            {tickets.map((ticket) => (
+              <SortableTicketCard
+                key={ticket.id}
+                ticket={ticket}
+                onClick={onTicketClick}
+              />
+            ))}
+            {tickets.length === 0 && (
+              <div className="text-center py-8 text-slate-400 dark:text-slate-500">
+                <p className="text-sm">Nenhum chamado</p>
+              </div>
+            )}
+          </div>
+        </SortableContext>
+      </div>
+    </div>
+  );
+};
+
 export const TicketsKanban = ({ userRole, prefilterStatus }: TicketsKanbanProps) => {
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -293,10 +342,12 @@ export const TicketsKanban = ({ userRole, prefilterStatus }: TicketsKanbanProps)
 
     if (!over) return;
 
-    const activeTicket = filteredTickets.find(ticket => ticket.id === active.id);
+    const activeTicket = tickets.find(ticket => ticket.id === active.id);
     if (!activeTicket) return;
 
     const newStatus = over.id as string;
+    
+    console.log('Dragging ticket:', activeTicket.id, 'to status:', newStatus);
     
     if (activeTicket.status !== newStatus) {
       setTickets(prevTickets =>
@@ -306,6 +357,7 @@ export const TicketsKanban = ({ userRole, prefilterStatus }: TicketsKanbanProps)
             : ticket
         )
       );
+      console.log('Ticket status updated successfully');
     }
   };
 
@@ -388,36 +440,12 @@ export const TicketsKanban = ({ userRole, prefilterStatus }: TicketsKanbanProps)
             const columnTickets = getTicketsByStatus(column.id);
             
             return (
-              <div key={column.id} className="space-y-4">
-                <div className={`p-4 rounded-lg border-2 ${column.color}`}>
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="font-semibold text-slate-900 dark:text-[#F6F6F6]">{column.title}</h3>
-                    <span className="text-xs font-medium bg-white dark:bg-slate-700 px-2 py-1 rounded text-slate-600 dark:text-slate-300">
-                      {columnTickets.length}
-                    </span>
-                  </div>
-
-                  <SortableContext
-                    items={columnTickets.map(ticket => ticket.id)}
-                    strategy={verticalListSortingStrategy}
-                  >
-                    <div className="space-y-3 min-h-[200px]">
-                      {columnTickets.map((ticket) => (
-                        <SortableTicketCard
-                          key={ticket.id}
-                          ticket={ticket}
-                          onClick={handleTicketClick}
-                        />
-                      ))}
-                      {columnTickets.length === 0 && (
-                        <div className="text-center py-8 text-slate-400 dark:text-slate-500">
-                          <p className="text-sm">Nenhum chamado</p>
-                        </div>
-                      )}
-                    </div>
-                  </SortableContext>
-                </div>
-              </div>
+              <DroppableColumn
+                key={column.id}
+                column={column}
+                tickets={columnTickets}
+                onTicketClick={handleTicketClick}
+              />
             );
           })}
         </div>
