@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { OperatorNavbar } from '@/components/operator/OperatorNavbar';
 import { DashboardStats } from '@/components/operator/DashboardStats';
 import { TicketsKanban } from '@/components/operator/TicketsKanban';
@@ -9,16 +9,19 @@ import { DashboardTickets } from '@/components/operator/DashboardTickets';
 import { PeriodFilter } from '@/components/operator/PeriodFilter';
 import { PersonalMetrics } from '@/components/operator/PersonalMetrics';
 import { ActivityFeed } from '@/components/operator/ActivityFeed';
+import { Button } from '@/components/ui/button';
+import { Plus } from 'lucide-react';
 
 const Dashboard = () => {
   const [user, setUser] = useState<any>(null);
-  const [currentSection, setCurrentSection] = useState<'dashboard' | 'tickets'>('dashboard');
+  const [currentSection, setCurrentSection] = useState<'dashboard' | 'tickets' | 'reports'>('dashboard');
   const [viewMode, setViewMode] = useState<'kanban' | 'list'>('kanban');
   const [prefilterStatus, setPrefilterStatus] = useState<string | undefined>(undefined);
   const [selectedPeriod, setSelectedPeriod] = useState('month');
   const [selectedOperator, setSelectedOperator] = useState('all');
   const [ticketToOpen, setTicketToOpen] = useState<string | null>(null);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   useEffect(() => {
     const userData = localStorage.getItem('coredesk_user');
@@ -35,6 +38,14 @@ const Dashboard = () => {
     }
   }, [navigate]);
 
+  // Handle URL params for section navigation
+  useEffect(() => {
+    const section = searchParams.get('section');
+    if (section === 'tickets' || section === 'reports') {
+      setCurrentSection(section);
+    }
+  }, [searchParams]);
+
   const handleNavigateToTickets = (status: string) => {
     setCurrentSection('tickets');
     setViewMode('list');
@@ -50,6 +61,28 @@ const Dashboard = () => {
     setPrefilterStatus(undefined);
   };
 
+  const handleCreateTicket = () => {
+    navigate('/create-ticket');
+  };
+
+  const handleSectionChange = (section: 'dashboard' | 'tickets' | 'reports') => {
+    setCurrentSection(section);
+    if (section === 'tickets') {
+      setPrefilterStatus(undefined);
+      setTicketToOpen(null);
+    } else if (section === 'reports') {
+      navigate('/reports');
+      return;
+    }
+    
+    // Update URL
+    if (section !== 'dashboard') {
+      navigate(`/dashboard?section=${section}`, { replace: true });
+    } else {
+      navigate('/dashboard', { replace: true });
+    }
+  };
+
   if (!user) {
     return <div className="dark:bg-[#2b2d31] dark:text-[#F6F6F6]">Carregando...</div>;
   }
@@ -59,13 +92,7 @@ const Dashboard = () => {
       <OperatorNavbar 
         user={user} 
         currentSection={currentSection}
-        onSectionChange={(section) => {
-          setCurrentSection(section);
-          if (section === 'tickets') {
-            setPrefilterStatus(undefined);
-            setTicketToOpen(null);
-          }
-        }}
+        onSectionChange={handleSectionChange}
       />
       
       <div className="pt-16">
@@ -109,30 +136,36 @@ const Dashboard = () => {
 
           {currentSection === 'tickets' && (
             <div className="space-y-6">
-              {/* View Mode Toggle */}
+              {/* Header with Create Button */}
               <div className="flex items-center justify-between">
                 <h2 className="text-2xl font-bold text-slate-900 dark:text-[#F6F6F6]">Todos os Chamados</h2>
                 <div className="flex items-center space-x-2">
-                  <button
-                    onClick={() => setViewMode('kanban')}
-                    className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                      viewMode === 'kanban'
-                        ? 'bg-blue-500 text-white'
-                        : 'bg-slate-200 text-slate-700 hover:bg-slate-300 dark:bg-slate-700 dark:text-[#F6F6F6] dark:hover:bg-slate-600'
-                    }`}
-                  >
-                    Kanban
-                  </button>
-                  <button
-                    onClick={() => setViewMode('list')}
-                    className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                      viewMode === 'list'
-                        ? 'bg-blue-500 text-white'
-                        : 'bg-slate-200 text-slate-700 hover:bg-slate-300 dark:bg-slate-700 dark:text-[#F6F6F6] dark:hover:bg-slate-600'
-                    }`}
-                  >
-                    Lista
-                  </button>
+                  <Button onClick={handleCreateTicket}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Criar chamado
+                  </Button>
+                  <div className="flex items-center space-x-2">
+                    <button
+                      onClick={() => setViewMode('kanban')}
+                      className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                        viewMode === 'kanban'
+                          ? 'bg-blue-500 text-white'
+                          : 'bg-slate-200 text-slate-700 hover:bg-slate-300 dark:bg-slate-700 dark:text-[#F6F6F6] dark:hover:bg-slate-600'
+                      }`}
+                    >
+                      Kanban
+                    </button>
+                    <button
+                      onClick={() => setViewMode('list')}
+                      className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                        viewMode === 'list'
+                          ? 'bg-blue-500 text-white'
+                          : 'bg-slate-200 text-slate-700 hover:bg-slate-300 dark:bg-slate-700 dark:text-[#F6F6F6] dark:hover:bg-slate-600'
+                      }`}
+                    >
+                      Lista
+                    </button>
+                  </div>
                 </div>
               </div>
 

@@ -47,7 +47,7 @@ interface Ticket {
 
 interface SortableTicketCardProps {
   ticket: Ticket;
-  onClick: (ticket: Ticket) => void;
+  onClick: (ticket: Ticket, event?: React.MouseEvent) => void;
 }
 
 const SortableTicketCard = ({ ticket, onClick }: SortableTicketCardProps) => {
@@ -63,7 +63,8 @@ const SortableTicketCard = ({ ticket, onClick }: SortableTicketCardProps) => {
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    opacity: isDragging ? 0.5 : 1,
+    opacity: isDragging ? 0.8 : 1,
+    zIndex: isDragging ? 1000 : 'auto',
   };
 
   const getPriorityColor = (priority: string) => {
@@ -93,14 +94,24 @@ const SortableTicketCard = ({ ticket, onClick }: SortableTicketCardProps) => {
     return null;
   };
 
+  const handleClick = (event: React.MouseEvent) => {
+    // Only handle click if not dragging
+    if (!isDragging) {
+      event.stopPropagation();
+      onClick(ticket, event);
+    }
+  };
+
   return (
     <Card
       ref={setNodeRef}
       style={style}
       {...attributes}
       {...listeners}
-      className="p-4 mb-3 cursor-grab active:cursor-grabbing hover:shadow-md transition-all duration-200 bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700"
-      onClick={() => onClick(ticket)}
+      className={`p-4 mb-3 cursor-grab active:cursor-grabbing hover:shadow-md transition-all duration-200 bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 ${
+        isDragging ? 'shadow-lg ring-2 ring-blue-500' : ''
+      }`}
+      onClick={handleClick}
     >
       <div className="space-y-3">
         {/* Header */}
@@ -260,7 +271,11 @@ export const TicketsKanban = ({ userRole, prefilterStatus }: TicketsKanbanProps)
   });
 
   const sensors = useSensors(
-    useSensor(PointerSensor),
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     })
@@ -294,7 +309,11 @@ export const TicketsKanban = ({ userRole, prefilterStatus }: TicketsKanbanProps)
     }
   };
 
-  const handleTicketClick = (ticket: Ticket) => {
+  const handleTicketClick = (ticket: Ticket, event?: React.MouseEvent) => {
+    // Prevent opening modal when dragging
+    if (event) {
+      event.stopPropagation();
+    }
     setSelectedTicket(ticket);
     setIsModalOpen(true);
   };
