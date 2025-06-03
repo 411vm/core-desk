@@ -34,7 +34,7 @@ const App = () => (
             <Route path="/settings" element={<Settings />} />
             <Route path="/reports" element={<Reports />} />
             <Route path="/create-ticket" element={<CreateTicket />} />
-            <Route path="/ticket/:id" element={<TicketView />} />
+            <Route path="/chamados/:id" element={<TicketView />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

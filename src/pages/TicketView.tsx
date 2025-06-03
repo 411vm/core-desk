@@ -5,7 +5,7 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { ArrowLeft, Clock, User, Building, Tag, MessageSquare, Send } from 'lucide-react';
+import { ArrowLeft, Clock, User, Building, Tag, MessageSquare, Send, Edit, FileText, Users } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface TicketResponse {
@@ -181,35 +181,59 @@ const TicketView = () => {
         <div className="mb-6">
           <Button 
             variant="ghost" 
-            onClick={() => navigate(-1)}
+            onClick={() => navigate('/dashboard')}
             className="mb-4"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Voltar
+            Voltar ao Dashboard
           </Button>
 
           <Card className="p-6">
             <div className="flex items-start justify-between mb-4">
-              <div>
-                <h1 className="text-2xl font-bold text-slate-900 dark:text-[#F6F6F6] mb-2">
-                  {ticket.title}
-                </h1>
-                <p className="text-sm text-slate-600 dark:text-slate-300">
-                  Chamado {ticket.id}
+              <div className="flex-1">
+                <div className="flex items-center gap-3 mb-2">
+                  <h1 className="text-2xl font-bold text-slate-900 dark:text-[#F6F6F6]">
+                    {ticket.title}
+                  </h1>
+                  <Badge className={`text-xs ${getStatusColor(ticket.status)}`}>
+                    {ticket.status}
+                  </Badge>
+                  <Badge className={`text-xs ${getPriorityColor(ticket.priority)}`}>
+                    {getPriorityLabel(ticket.priority)}
+                  </Badge>
+                </div>
+                <p className="text-sm text-slate-600 dark:text-slate-300 mb-4">
+                  Chamado {ticket.id} • Criado em {ticket.createdAt}
                 </p>
+                
+                {/* Badges de categoria e setor */}
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="flex items-center text-sm text-slate-600 dark:text-slate-300">
+                    <FileText className="h-4 w-4 mr-1" />
+                    <span className="bg-slate-100 dark:bg-slate-700 px-2 py-1 rounded text-xs">
+                      {ticket.category}
+                    </span>
+                  </div>
+                  <div className="flex items-center text-sm text-slate-600 dark:text-slate-300">
+                    <Users className="h-4 w-4 mr-1" />
+                    <span className="bg-blue-100 dark:bg-blue-900 px-2 py-1 rounded text-xs text-blue-800 dark:text-blue-200">
+                      {ticket.sector}
+                    </span>
+                  </div>
+                </div>
               </div>
+              
+              {/* Ações rápidas */}
               <div className="flex flex-col gap-2">
-                <Badge className={`text-xs ${getStatusColor(ticket.status)}`}>
-                  {ticket.status}
-                </Badge>
-                <Badge className={`text-xs ${getPriorityColor(ticket.priority)}`}>
-                  {getPriorityLabel(ticket.priority)}
-                </Badge>
+                <Button variant="outline" size="sm">
+                  <Edit className="h-4 w-4 mr-2" />
+                  Editar
+                </Button>
               </div>
             </div>
 
             {/* Informações principais */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6 pt-6 border-t border-slate-200 dark:border-slate-700">
               <div className="flex items-center space-x-2">
                 <User className="h-4 w-4 text-slate-500" />
                 <div>
@@ -231,14 +255,6 @@ const TicketView = () => {
                 <div>
                   <p className="text-xs text-slate-500 dark:text-slate-400">Categoria</p>
                   <p className="font-medium text-slate-900 dark:text-[#F6F6F6]">{ticket.category}</p>
-                </div>
-              </div>
-
-              <div className="flex items-center space-x-2">
-                <Clock className="h-4 w-4 text-slate-500" />
-                <div>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">Criado em</p>
-                  <p className="font-medium text-slate-900 dark:text-[#F6F6F6]">{ticket.createdAt}</p>
                 </div>
               </div>
 

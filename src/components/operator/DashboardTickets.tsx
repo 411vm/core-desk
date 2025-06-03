@@ -134,7 +134,7 @@ export const DashboardTickets = ({ userRole }: DashboardTicketsProps) => {
   });
 
   const handleTicketClick = (ticket: Ticket) => {
-    navigate(`/ticket/${ticket.id}`);
+    navigate(`/chamados/${ticket.id}`);
   };
 
   const handleUpdateTicket = (ticketId: string, updates: Partial<Ticket>) => {

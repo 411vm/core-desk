@@ -111,7 +111,7 @@ const SortableTicketCard = ({ ticket, onClick, isDragOverlay = false }: Sortable
   const handleClick = (event: React.MouseEvent) => {
     if (!isDragging && !isDragOverlay) {
       event.stopPropagation();
-      onClick(ticket, event);
+      window.location.href = `/chamados/${ticket.id}`;
     }
   };
 
@@ -437,8 +437,7 @@ export const TicketsKanban = ({ userRole, prefilterStatus }: TicketsKanbanProps)
     if (event) {
       event.stopPropagation();
     }
-    setSelectedTicket(ticket);
-    setIsModalOpen(true);
+    window.location.href = `/chamados/${ticket.id}`;
   };
 
   const handleUpdateTicket = (ticketId: string, updates: Partial<Ticket>) => {

@@ -157,6 +157,10 @@ export const TicketsList = ({ userRole, prefilterStatus, ticketToOpen, onTicketO
     setIsModalOpen(true);
   };
 
+  const handleRowClick = (ticket: Ticket) => {
+    window.location.href = `/chamados/${ticket.id}`;
+  };
+
   const handleUpdateTicket = (ticketId: string, updates: Partial<Ticket>) => {
     setTickets(prevTickets =>
       prevTickets.map(ticket =>
@@ -308,7 +312,7 @@ export const TicketsList = ({ userRole, prefilterStatus, ticketToOpen, onTicketO
                 <TableRow 
                   key={ticket.id} 
                   className="hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer transition-colors"
-                  onClick={() => handleTicketClick(ticket)}
+                  onClick={() => handleRowClick(ticket)}
                 >
                   <TableCell className="font-medium">{ticket.id}</TableCell>
                   <TableCell>

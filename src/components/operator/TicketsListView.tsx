@@ -80,7 +80,7 @@ export const TicketsListView = ({
   };
 
   const handleRowClick = (ticket: Ticket) => {
-    navigate(`/ticket/${ticket.id}`);
+    navigate(`/chamados/${ticket.id}`);
   };
 
   return (
