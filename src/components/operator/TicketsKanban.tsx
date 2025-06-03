@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import {
   DndContext,
@@ -29,6 +28,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Clock, User, MessageSquare, Paperclip, AlertTriangle, Search, Filter } from 'lucide-react';
 import { TicketDetailModal } from './TicketDetailModal';
+import { SectorFilter } from './SectorFilter';
 
 interface TicketsKanbanProps {
   userRole: string;
@@ -48,6 +48,13 @@ interface Ticket {
   responses: number;
   attachments: number;
   description: string;
+  sectorId?: string;
+}
+
+interface Sector {
+  id: string;
+  name: string;
+  color: string;
 }
 
 interface SortableTicketCardProps {
@@ -239,8 +246,18 @@ export const TicketsKanban = ({ userRole, prefilterStatus }: TicketsKanbanProps)
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState(prefilterStatus || 'all');
   const [priorityFilter, setPriorityFilter] = useState('all');
+  const [selectedSector, setSelectedSector] = useState('all');
   const [activeId, setActiveId] = useState<string | null>(null);
   const [overId, setOverId] = useState<string | null>(null);
+  
+  const [sectors] = useState<Sector[]>([
+    { id: '1', name: 'Suporte N1', color: '#3b82f6' },
+    { id: '2', name: 'Suporte N2', color: '#f59e0b' },
+    { id: '3', name: 'Suporte N3', color: '#ef4444' },
+    { id: '4', name: 'Desenvolvimento', color: '#10b981' },
+    { id: '5', name: 'Infraestrutura', color: '#8b5cf6' },
+  ]);
+
   const [tickets, setTickets] = useState<Ticket[]>([
     {
       id: '#2024-001',
@@ -254,7 +271,8 @@ export const TicketsKanban = ({ userRole, prefilterStatus }: TicketsKanbanProps)
       updatedAt: '2024-01-15 14:30',
       responses: 0,
       attachments: 1,
-      description: 'Não consigo acessar minha conta de email desde ontem'
+      description: 'Não consigo acessar minha conta de email desde ontem',
+      sectorId: '1'
     },
     {
       id: '#2024-002',
@@ -268,7 +286,8 @@ export const TicketsKanban = ({ userRole, prefilterStatus }: TicketsKanbanProps)
       updatedAt: '2024-01-15 15:45',
       responses: 0,
       attachments: 0,
-      description: 'Preciso instalar o Adobe Reader para abrir documentos PDF'
+      description: 'Preciso instalar o Adobe Reader para abrir documentos PDF',
+      sectorId: '1'
     },
     {
       id: '#2024-003',
@@ -282,7 +301,8 @@ export const TicketsKanban = ({ userRole, prefilterStatus }: TicketsKanbanProps)
       updatedAt: '2024-01-15 16:10',
       responses: 2,
       attachments: 2,
-      description: 'Meu computador está travando várias vezes ao dia'
+      description: 'Meu computador está travando várias vezes ao dia',
+      sectorId: '2'
     },
     {
       id: '#2024-004',
@@ -296,7 +316,8 @@ export const TicketsKanban = ({ userRole, prefilterStatus }: TicketsKanbanProps)
       updatedAt: '2024-01-15 11:30',
       responses: 1,
       attachments: 0,
-      description: 'Esqueci a senha do sistema ERP'
+      description: 'Esqueci a senha do sistema ERP',
+      sectorId: '4'
     },
     {
       id: '#2024-005',
@@ -310,7 +331,8 @@ export const TicketsKanban = ({ userRole, prefilterStatus }: TicketsKanbanProps)
       updatedAt: '2024-01-15 10:45',
       responses: 3,
       attachments: 1,
-      description: 'Nova impressora não está sendo reconhecida'
+      description: 'Nova impressora não está sendo reconhecida',
+      sectorId: '5'
     }
   ]);
 
@@ -321,7 +343,7 @@ export const TicketsKanban = ({ userRole, prefilterStatus }: TicketsKanbanProps)
     }
   }, [prefilterStatus]);
 
-  // Filter tickets based on search and filters
+  // Filter tickets based on search, filters, and sector
   const filteredTickets = tickets.filter(ticket => {
     const matchesSearch = ticket.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          ticket.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -329,9 +351,19 @@ export const TicketsKanban = ({ userRole, prefilterStatus }: TicketsKanbanProps)
                          ticket.requester.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === 'all' || ticket.status === statusFilter;
     const matchesPriority = priorityFilter === 'all' || ticket.priority === priorityFilter;
+    const matchesSector = selectedSector === 'all' || ticket.sectorId === selectedSector;
     
-    return matchesSearch && matchesStatus && matchesPriority;
+    return matchesSearch && matchesStatus && matchesPriority && matchesSector;
   });
+
+  // Calculate ticket counts per sector
+  const ticketCounts = {
+    all: tickets.length,
+    ...sectors.reduce((acc, sector) => {
+      acc[sector.id] = tickets.filter(ticket => ticket.sectorId === sector.id).length;
+      return acc;
+    }, {} as Record<string, number>)
+  };
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -350,6 +382,21 @@ export const TicketsKanban = ({ userRole, prefilterStatus }: TicketsKanbanProps)
     { id: 'Aguardando', title: 'Aguardando', color: 'border-orange-200 bg-orange-50 dark:bg-orange-950/20 dark:border-orange-800' },
     { id: 'Resolvido', title: 'Resolvidos', color: 'border-green-200 bg-green-50 dark:bg-green-950/20 dark:border-green-800' }
   ];
+
+  const getSectorBadge = (sectorId?: string) => {
+    if (!sectorId) return null;
+    const sector = sectors.find(s => s.id === sectorId);
+    if (!sector) return null;
+    
+    return (
+      <Badge 
+        className="text-xs text-white"
+        style={{ backgroundColor: sector.color }}
+      >
+        {sector.name}
+      </Badge>
+    );
+  };
 
   const handleDragStart = (event: DragStartEvent) => {
     setActiveId(event.active.id as string);
@@ -410,6 +457,14 @@ export const TicketsKanban = ({ userRole, prefilterStatus }: TicketsKanbanProps)
 
   return (
     <>
+      {/* Sector Filter */}
+      <SectorFilter
+        sectors={sectors}
+        selectedSector={selectedSector}
+        onSectorChange={setSelectedSector}
+        ticketCounts={ticketCounts}
+      />
+
       {/* Filters and Search Bar */}
       <Card className="p-4 mb-6">
         <div className="flex flex-col md:flex-row gap-4">

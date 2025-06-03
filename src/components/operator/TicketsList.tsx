@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Filter, Search, MoreHorizontal, Clock, User, MessageSquare, Paperclip } from 'lucide-react';
 import { TicketDetailModal } from './TicketDetailModal';
+import { SectorFilter } from './SectorFilter';
 
 interface TicketsListProps {
   userRole: string;
@@ -27,14 +28,30 @@ interface Ticket {
   responses: number;
   attachments: number;
   description: string;
+  sectorId?: string;
+}
+
+interface Sector {
+  id: string;
+  name: string;
+  color: string;
 }
 
 export const TicketsList = ({ userRole, prefilterStatus, ticketToOpen, onTicketOpened }: TicketsListProps) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState(prefilterStatus || 'all');
   const [priorityFilter, setPriorityFilter] = useState('all');
+  const [selectedSector, setSelectedSector] = useState('all');
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const [sectors] = useState<Sector[]>([
+    { id: '1', name: 'Suporte N1', color: '#3b82f6' },
+    { id: '2', name: 'Suporte N2', color: '#f59e0b' },
+    { id: '3', name: 'Suporte N3', color: '#ef4444' },
+    { id: '4', name: 'Desenvolvimento', color: '#10b981' },
+    { id: '5', name: 'Infraestrutura', color: '#8b5cf6' },
+  ]);
 
   // Apply prefilter when prop changes
   useEffect(() => {
@@ -70,7 +87,8 @@ export const TicketsList = ({ userRole, prefilterStatus, ticketToOpen, onTicketO
       updatedAt: '2024-01-15 14:30',
       responses: 0,
       attachments: 1,
-      description: 'Não consigo acessar minha conta de email desde ontem'
+      description: 'Não consigo acessar minha conta de email desde ontem',
+      sectorId: '1'
     },
     {
       id: '#2024-002',
@@ -84,7 +102,8 @@ export const TicketsList = ({ userRole, prefilterStatus, ticketToOpen, onTicketO
       updatedAt: '2024-01-15 15:45',
       responses: 0,
       attachments: 0,
-      description: 'Preciso instalar o Adobe Reader para abrir documentos PDF'
+      description: 'Preciso instalar o Adobe Reader para abrir documentos PDF',
+      sectorId: '1'
     },
     {
       id: '#2024-003',
@@ -98,7 +117,8 @@ export const TicketsList = ({ userRole, prefilterStatus, ticketToOpen, onTicketO
       updatedAt: '2024-01-15 16:10',
       responses: 2,
       attachments: 2,
-      description: 'Meu computador está travando várias vezes ao dia'
+      description: 'Meu computador está travando várias vezes ao dia',
+      sectorId: '2'
     },
     {
       id: '#2024-004',
@@ -112,7 +132,8 @@ export const TicketsList = ({ userRole, prefilterStatus, ticketToOpen, onTicketO
       updatedAt: '2024-01-15 11:30',
       responses: 1,
       attachments: 0,
-      description: 'Esqueci a senha do sistema ERP'
+      description: 'Esqueci a senha do sistema ERP',
+      sectorId: '4'
     },
     {
       id: '#2024-005',
@@ -126,7 +147,8 @@ export const TicketsList = ({ userRole, prefilterStatus, ticketToOpen, onTicketO
       updatedAt: '2024-01-15 10:45',
       responses: 3,
       attachments: 1,
-      description: 'Nova impressora não está sendo reconhecida'
+      description: 'Nova impressora não está sendo reconhecida',
+      sectorId: '5'
     }
   ]);
 
@@ -173,18 +195,51 @@ export const TicketsList = ({ userRole, prefilterStatus, ticketToOpen, onTicketO
     }
   };
 
+  // Calculate ticket counts per sector
+  const ticketCounts = {
+    all: tickets.length,
+    ...sectors.reduce((acc, sector) => {
+      acc[sector.id] = tickets.filter(ticket => ticket.sectorId === sector.id).length;
+      return acc;
+    }, {} as Record<string, number>)
+  };
+
   const filteredTickets = tickets.filter(ticket => {
     const matchesSearch = ticket.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          ticket.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          ticket.requester.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === 'all' || ticket.status === statusFilter;
     const matchesPriority = priorityFilter === 'all' || ticket.priority === priorityFilter;
+    const matchesSector = selectedSector === 'all' || ticket.sectorId === selectedSector;
     
-    return matchesSearch && matchesStatus && matchesPriority;
+    return matchesSearch && matchesStatus && matchesPriority && matchesSector;
   });
+
+  const getSectorBadge = (sectorId?: string) => {
+    if (!sectorId) return null;
+    const sector = sectors.find(s => s.id === sectorId);
+    if (!sector) return null;
+    
+    return (
+      <Badge 
+        className="text-xs text-white"
+        style={{ backgroundColor: sector.color }}
+      >
+        {sector.name}
+      </Badge>
+    );
+  };
 
   return (
     <>
+      {/* Sector Filter */}
+      <SectorFilter
+        sectors={sectors}
+        selectedSector={selectedSector}
+        onSectorChange={setSelectedSector}
+        ticketCounts={ticketCounts}
+      />
+
       <Card className="p-6">
         {/* Filters */}
         <div className="flex flex-col md:flex-row gap-4 mb-6">
@@ -239,6 +294,7 @@ export const TicketsList = ({ userRole, prefilterStatus, ticketToOpen, onTicketO
                 <TableHead>Título</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Prioridade</TableHead>
+                <TableHead>Setor</TableHead>
                 <TableHead>Categoria</TableHead>
                 <TableHead>Solicitante</TableHead>
                 <TableHead>Responsável</TableHead>
@@ -283,6 +339,9 @@ export const TicketsList = ({ userRole, prefilterStatus, ticketToOpen, onTicketO
                     <Badge className={`text-xs ${getPriorityColor(ticket.priority)}`}>
                       {getPriorityLabel(ticket.priority)}
                     </Badge>
+                  </TableCell>
+                  <TableCell>
+                    {getSectorBadge(ticket.sectorId)}
                   </TableCell>
                   <TableCell>{ticket.category}</TableCell>
                   <TableCell>

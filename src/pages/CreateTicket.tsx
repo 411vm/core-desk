@@ -19,8 +19,17 @@ const CreateTicket = () => {
     priority: 'medium',
     type: 'problem',
     status: 'Novo',
-    description: ''
+    description: '',
+    sectorId: ''
   });
+
+  const sectors = [
+    { id: '1', name: 'Suporte N1', color: '#3b82f6' },
+    { id: '2', name: 'Suporte N2', color: '#f59e0b' },
+    { id: '3', name: 'Suporte N3', color: '#ef4444' },
+    { id: '4', name: 'Desenvolvimento', color: '#10b981' },
+    { id: '5', name: 'Infraestrutura', color: '#8b5cf6' },
+  ];
 
   const handleSave = (saveAsDraft = false) => {
     console.log('Salvando chamado:', { ...ticketData, isDraft: saveAsDraft, isPublic });
@@ -121,6 +130,24 @@ const CreateTicket = () => {
                   className="mt-1"
                   required
                 />
+              </div>
+              
+              <div>
+                <Label htmlFor="sectorId">Setor Responsável *</Label>
+                <select
+                  id="sectorId"
+                  value={ticketData.sectorId}
+                  onChange={(e) => setTicketData(prev => ({ ...prev, sectorId: e.target.value }))}
+                  className="mt-1 w-full px-3 py-2 border border-slate-200 rounded-md text-sm dark:bg-slate-800 dark:border-slate-600 dark:text-[#F6F6F6]"
+                  required
+                >
+                  <option value="">Selecione um setor</option>
+                  {sectors.map(sector => (
+                    <option key={sector.id} value={sector.id}>
+                      {sector.name}
+                    </option>
+                  ))}
+                </select>
               </div>
               
               <div>
