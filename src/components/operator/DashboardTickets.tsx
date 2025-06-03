@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -135,6 +135,17 @@ export const DashboardTickets = ({ userRole }: DashboardTicketsProps) => {
     
     return matchesSearch && matchesStatus && matchesPriority && isRecentOrReply;
   });
+
+  // Calculate critical alerts for all filtered tickets at the component level
+  const ticketsWithCriticalData = useMemo(() => {
+    return filteredTickets.map(ticket => {
+      const criticalData = useCriticalTimeAlerts(ticket);
+      return {
+        ...ticket,
+        criticalData
+      };
+    });
+  }, [filteredTickets]);
 
   const handleTicketClick = (ticket: Ticket) => {
     navigate(`/chamados/${ticket.id}`);
@@ -301,8 +312,9 @@ export const DashboardTickets = ({ userRole }: DashboardTicketsProps) => {
             />
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filteredTickets.map((ticket) => {
-                const { isCritical, alertLevel } = useCriticalTimeAlerts(ticket);
+              {ticketsWithCriticalData.map((ticketWithData) => {
+                const { criticalData, ...ticket } = ticketWithData;
+                const { isCritical, alertLevel } = criticalData;
                 const criticalStyles = getCriticalAlertStyles(alertLevel);
                 
                 return (
