@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import {
   DndContext,
@@ -8,6 +9,9 @@ import {
   useSensors,
   DragEndEvent,
   useDroppable,
+  DragOverlay,
+  DragStartEvent,
+  DragOverEvent,
 } from '@dnd-kit/core';
 import {
   arrayMove,
@@ -49,9 +53,10 @@ interface Ticket {
 interface SortableTicketCardProps {
   ticket: Ticket;
   onClick: (ticket: Ticket, event?: React.MouseEvent) => void;
+  isDragOverlay?: boolean;
 }
 
-const SortableTicketCard = ({ ticket, onClick }: SortableTicketCardProps) => {
+const SortableTicketCard = ({ ticket, onClick, isDragOverlay = false }: SortableTicketCardProps) => {
   const {
     attributes,
     listeners,
@@ -64,8 +69,9 @@ const SortableTicketCard = ({ ticket, onClick }: SortableTicketCardProps) => {
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    opacity: isDragging ? 0.8 : 1,
-    zIndex: isDragging ? 1000 : 'auto',
+    opacity: isDragOverlay ? 1 : (isDragging ? 0.5 : 1),
+    zIndex: isDragOverlay ? 1000 : 'auto',
+    cursor: isDragging ? 'grabbing' : 'grab',
   };
 
   const getPriorityColor = (priority: string) => {
@@ -96,8 +102,7 @@ const SortableTicketCard = ({ ticket, onClick }: SortableTicketCardProps) => {
   };
 
   const handleClick = (event: React.MouseEvent) => {
-    // Only handle click if not dragging
-    if (!isDragging) {
+    if (!isDragging && !isDragOverlay) {
       event.stopPropagation();
       onClick(ticket, event);
     }
@@ -110,8 +115,8 @@ const SortableTicketCard = ({ ticket, onClick }: SortableTicketCardProps) => {
       {...attributes}
       {...listeners}
       className={`p-4 mb-3 cursor-grab active:cursor-grabbing hover:shadow-md transition-all duration-200 bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 ${
-        isDragging ? 'shadow-lg ring-2 ring-blue-500' : ''
-      }`}
+        isDragging ? 'shadow-lg ring-2 ring-blue-500 rotate-2' : ''
+      } ${isDragOverlay ? 'shadow-xl rotate-3 scale-105' : ''}`}
       onClick={handleClick}
     >
       <div className="space-y-3">
@@ -173,23 +178,30 @@ const SortableTicketCard = ({ ticket, onClick }: SortableTicketCardProps) => {
   );
 };
 
-// New DroppableColumn component
+// DroppableColumn component
 const DroppableColumn = ({ 
   column, 
   tickets, 
-  onTicketClick 
+  onTicketClick,
+  isOver 
 }: { 
   column: any;
   tickets: Ticket[];
   onTicketClick: (ticket: Ticket, event?: React.MouseEvent) => void;
+  isOver?: boolean;
 }) => {
   const { setNodeRef } = useDroppable({
     id: column.id,
   });
 
   return (
-    <div key={column.id} className="space-y-4">
-      <div ref={setNodeRef} className={`p-4 rounded-lg border-2 ${column.color} min-h-[400px]`}>
+    <div className="space-y-4">
+      <div 
+        ref={setNodeRef} 
+        className={`p-4 rounded-lg border-2 transition-all duration-200 min-h-[400px] ${column.color} ${
+          isOver ? 'ring-2 ring-blue-500 ring-opacity-50 bg-blue-50 dark:bg-blue-950/30' : ''
+        }`}
+      >
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-semibold text-slate-900 dark:text-[#F6F6F6]">{column.title}</h3>
           <span className="text-xs font-medium bg-white dark:bg-slate-700 px-2 py-1 rounded text-slate-600 dark:text-slate-300">
@@ -227,6 +239,8 @@ export const TicketsKanban = ({ userRole, prefilterStatus }: TicketsKanbanProps)
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState(prefilterStatus || 'all');
   const [priorityFilter, setPriorityFilter] = useState('all');
+  const [activeId, setActiveId] = useState<string | null>(null);
+  const [overId, setOverId] = useState<string | null>(null);
   const [tickets, setTickets] = useState<Ticket[]>([
     {
       id: '#2024-001',
@@ -337,8 +351,19 @@ export const TicketsKanban = ({ userRole, prefilterStatus }: TicketsKanbanProps)
     { id: 'Resolvido', title: 'Resolvidos', color: 'border-green-200 bg-green-50 dark:bg-green-950/20 dark:border-green-800' }
   ];
 
+  const handleDragStart = (event: DragStartEvent) => {
+    setActiveId(event.active.id as string);
+  };
+
+  const handleDragOver = (event: DragOverEvent) => {
+    setOverId(event.over?.id as string || null);
+  };
+
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
+    
+    setActiveId(null);
+    setOverId(null);
 
     if (!over) return;
 
@@ -362,7 +387,6 @@ export const TicketsKanban = ({ userRole, prefilterStatus }: TicketsKanbanProps)
   };
 
   const handleTicketClick = (ticket: Ticket, event?: React.MouseEvent) => {
-    // Prevent opening modal when dragging
     if (event) {
       event.stopPropagation();
     }
@@ -381,6 +405,8 @@ export const TicketsKanban = ({ userRole, prefilterStatus }: TicketsKanbanProps)
   const getTicketsByStatus = (status: string) => {
     return filteredTickets.filter(ticket => ticket.status === status);
   };
+
+  const activeTicket = activeId ? tickets.find(ticket => ticket.id === activeId) : null;
 
   return (
     <>
@@ -433,6 +459,8 @@ export const TicketsKanban = ({ userRole, prefilterStatus }: TicketsKanbanProps)
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}
+        onDragStart={handleDragStart}
+        onDragOver={handleDragOver}
         onDragEnd={handleDragEnd}
       >
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -445,10 +473,21 @@ export const TicketsKanban = ({ userRole, prefilterStatus }: TicketsKanbanProps)
                 column={column}
                 tickets={columnTickets}
                 onTicketClick={handleTicketClick}
+                isOver={overId === column.id}
               />
             );
           })}
         </div>
+
+        <DragOverlay>
+          {activeTicket ? (
+            <SortableTicketCard
+              ticket={activeTicket}
+              onClick={() => {}}
+              isDragOverlay={true}
+            />
+          ) : null}
+        </DragOverlay>
       </DndContext>
 
       <TicketDetailModal
