@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { ArrowLeft, Clock, User, Building, Tag, MessageSquare, Send, Edit, FileText, Users } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { getTicketById, getTicketResponses, TicketResponse, TicketDetail } from '@/data/mockTickets';
+import { getTicketById, getTicketResponses, TicketResponse, TicketDetail, mockTicketsData } from '@/data/mockTickets';
 
 const TicketView = () => {
   const { id } = useParams<{ id: string }>();
@@ -47,7 +47,7 @@ const TicketView = () => {
         setResponses(ticketResponses);
       } else {
         console.error('TicketView: Ticket not found for ID:', id);
-        console.error('TicketView: Available ticket IDs:', Object.keys(require('@/data/mockTickets').mockTicketsData));
+        console.error('TicketView: Available ticket IDs:', Object.keys(mockTicketsData));
         toast({
           title: "Chamado não encontrado",
           description: `O chamado com ID "${id}" não foi encontrado.`,
