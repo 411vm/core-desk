@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
@@ -12,7 +11,7 @@ import { BulkActions } from './BulkActions';
 import { QuickFilters } from './QuickFilters';
 import { SmartSearch } from './SmartSearch';
 import { CriticalTimeAlert } from './CriticalTimeAlert';
-import { useCriticalTimeAlerts, getCriticalAlertStyles } from '@/hooks/useCriticalTimeAlerts';
+import { getCriticalAlertStyles } from '@/hooks/useCriticalTimeAlerts';
 import { useToast } from '@/hooks/use-toast';
 
 interface DashboardTicketsProps {
@@ -148,7 +147,10 @@ export const DashboardTickets = ({ userRole }: DashboardTicketsProps) => {
   }, [filteredTickets]);
 
   const handleTicketClick = (ticket: Ticket) => {
-    navigate(`/chamados/${ticket.id}`);
+    // Remove o # do ID antes de navegar para evitar problemas de URL
+    const ticketId = ticket.id.startsWith('#') ? ticket.id.substring(1) : ticket.id;
+    console.log('Navigating to ticket:', ticketId);
+    navigate(`/chamados/${ticketId}`);
   };
 
   const handleUpdateTicket = (ticketId: string, updates: Partial<Ticket>) => {
@@ -312,17 +314,13 @@ export const DashboardTickets = ({ userRole }: DashboardTicketsProps) => {
             />
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {ticketsWithCriticalData.map((ticketWithData) => {
-                const { criticalData, ...ticket } = ticketWithData;
-                const { isCritical, alertLevel } = criticalData;
-                const criticalStyles = getCriticalAlertStyles(alertLevel);
+              {filteredTickets.map((ticket) => {
+                const criticalStyles = getCriticalAlertStyles('normal');
                 
                 return (
                   <Card 
                     key={ticket.id} 
-                    className={`p-4 hover:shadow-md transition-all cursor-pointer group dark:bg-slate-800 dark:border-slate-700 hover:scale-102 ${
-                      isCritical ? criticalStyles.cardClass : ''
-                    }`}
+                    className={`p-4 hover:shadow-md transition-all cursor-pointer group dark:bg-slate-800 dark:border-slate-700 hover:scale-102`}
                     onClick={() => handleTicketClick(ticket)}
                   >
                     {/* Ticket Header */}
@@ -338,9 +336,6 @@ export const DashboardTickets = ({ userRole }: DashboardTicketsProps) => {
                             />
                           </div>
                           <p className="text-sm font-medium text-slate-900 dark:text-[#F6F6F6]">{ticket.id}</p>
-                          {isCritical && (
-                            <CriticalTimeAlert ticket={ticket} showBadge={false} showIcon={true} />
-                          )}
                         </div>
                         <div className="flex items-center space-x-2 mt-1">
                           <Badge className={`text-xs ${getPriorityColor(ticket.priority)}`}>
@@ -362,13 +357,6 @@ export const DashboardTickets = ({ userRole }: DashboardTicketsProps) => {
                         </div>
                       </div>
                     </div>
-
-                    {/* Critical Alert Badge */}
-                    {isCritical && (
-                      <div className="mb-2">
-                        <CriticalTimeAlert ticket={ticket} showBadge={true} showIcon={false} />
-                      </div>
-                    )}
 
                     {/* Ticket Content */}
                     <h4 className="font-medium text-slate-900 dark:text-[#F6F6F6] mb-2 line-clamp-2">

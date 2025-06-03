@@ -19,31 +19,51 @@ const TicketView = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    console.log('TicketView: ID from params:', id);
+    console.log('TicketView: Raw ID from URL params:', id);
+    console.log('TicketView: Current URL:', window.location.href);
+    console.log('TicketView: Current pathname:', window.location.pathname);
     
     if (id) {
-      const ticketData = getTicketById(id);
-      const ticketResponses = getTicketResponses(id);
+      console.log('TicketView: Processing ID:', id);
       
-      console.log('TicketView: Found ticket data:', ticketData);
-      console.log('TicketView: Found responses:', ticketResponses);
+      // Tentar buscar com o ID original primeiro
+      let ticketData = getTicketById(id);
+      let ticketResponses = getTicketResponses(id);
+      
+      console.log('TicketView: First attempt - Found ticket data:', ticketData);
+      
+      // Se não encontrar, tentar com o # adicionado
+      if (!ticketData) {
+        const idWithHash = `#${id}`;
+        console.log('TicketView: Trying with hash:', idWithHash);
+        ticketData = getTicketById(idWithHash);
+        ticketResponses = getTicketResponses(idWithHash);
+        console.log('TicketView: Second attempt - Found ticket data:', ticketData);
+      }
       
       if (ticketData) {
+        console.log('TicketView: Setting ticket data and responses');
         setTicket(ticketData);
         setResponses(ticketResponses);
       } else {
         console.error('TicketView: Ticket not found for ID:', id);
+        console.error('TicketView: Available ticket IDs:', Object.keys(require('@/data/mockTickets').mockTicketsData));
         toast({
           title: "Chamado não encontrado",
-          description: "O chamado solicitado não foi encontrado.",
+          description: `O chamado com ID "${id}" não foi encontrado.`,
           variant: "destructive"
         });
-        navigate('/dashboard');
-        return;
       }
+    } else {
+      console.error('TicketView: No ID provided in URL params');
+      toast({
+        title: "ID inválido",
+        description: "Nenhum ID de chamado foi fornecido na URL.",
+        variant: "destructive"
+      });
     }
     setLoading(false);
-  }, [id, navigate, toast]);
+  }, [id, toast]);
 
   const handleSendResponse = () => {
     if (!newResponse.trim()) return;
@@ -123,7 +143,7 @@ const TicketView = () => {
             Chamado não encontrado
           </h2>
           <p className="text-slate-600 dark:text-slate-300 mb-4">
-            O chamado solicitado não foi encontrado.
+            O chamado com ID "{id}" não foi encontrado no sistema.
           </p>
           <Button onClick={() => navigate('/dashboard')}>
             Voltar ao Dashboard
