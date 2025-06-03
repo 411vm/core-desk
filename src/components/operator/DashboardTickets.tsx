@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
@@ -11,7 +12,7 @@ import { BulkActions } from './BulkActions';
 import { QuickFilters } from './QuickFilters';
 import { SmartSearch } from './SmartSearch';
 import { CriticalTimeAlert } from './CriticalTimeAlert';
-import { getCriticalAlertStyles } from '@/hooks/useCriticalTimeAlerts';
+import { useCriticalTimeAlerts, getCriticalAlertStyles } from '@/hooks/useCriticalTimeAlerts';
 import { useToast } from '@/hooks/use-toast';
 
 interface DashboardTicketsProps {
@@ -315,7 +316,7 @@ export const DashboardTickets = ({ userRole }: DashboardTicketsProps) => {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {filteredTickets.map((ticket) => {
-                const criticalStyles = getCriticalAlertStyles('normal');
+                const criticalStyles = getCriticalAlertStyles('warning');
                 
                 return (
                   <Card 
