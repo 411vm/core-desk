@@ -327,14 +327,47 @@ export const mockResponsesData: Record<string, TicketResponse[]> = {
 export const getTicketById = (id: string): TicketDetail | null => {
   console.log('getTicketById called with ID:', id);
   console.log('Available tickets:', Object.keys(mockTicketsData));
-  const ticket = mockTicketsData[id] || null;
+  
+  // Tenta primeiro com o ID exato
+  let ticket = mockTicketsData[id];
+  
+  // Se não encontrar e o ID não começa com #, tenta com #
+  if (!ticket && !id.startsWith('#')) {
+    const idWithHash = `#${id}`;
+    ticket = mockTicketsData[idWithHash];
+    console.log('Trying with hash prefix:', idWithHash);
+  }
+  
+  // Se não encontrar e o ID começa com #, tenta sem #
+  if (!ticket && id.startsWith('#')) {
+    const idWithoutHash = id.substring(1);
+    ticket = mockTicketsData[idWithoutHash];
+    console.log('Trying without hash prefix:', idWithoutHash);
+  }
+  
   console.log('Found ticket:', ticket);
-  return ticket;
+  return ticket || null;
 };
 
 export const getTicketResponses = (id: string): TicketResponse[] => {
   console.log('getTicketResponses called with ID:', id);
-  const responses = mockResponsesData[id] || [];
-  console.log('Found responses:', responses);
-  return responses;
+  
+  // Tenta primeiro com o ID exato
+  let responses = mockResponsesData[id];
+  
+  // Se não encontrar e o ID não começa com #, tenta com #
+  if (!responses && !id.startsWith('#')) {
+    const idWithHash = `#${id}`;
+    responses = mockResponsesData[idWithHash];
+  }
+  
+  // Se não encontrar e o ID começa com #, tenta sem #
+  if (!responses && id.startsWith('#')) {
+    const idWithoutHash = id.substring(1);
+    responses = mockResponsesData[idWithoutHash];
+  }
+  
+  const finalResponses = responses || [];
+  console.log('Found responses:', finalResponses);
+  return finalResponses;
 };
