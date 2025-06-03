@@ -7,6 +7,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Filter, Search, MoreHorizontal, Clock, User, MessageSquare, Paperclip } from 'lucide-react';
 import { TicketDetailModal } from './TicketDetailModal';
 import { SectorFilter } from './SectorFilter';
+import { CriticalTimeAlert } from './CriticalTimeAlert';
+import { useCriticalTimeAlerts, getCriticalAlertStyles } from '@/hooks/useCriticalTimeAlerts';
 
 interface TicketsListProps {
   userRole: string;
@@ -308,79 +310,98 @@ export const TicketsList = ({ userRole, prefilterStatus, ticketToOpen, onTicketO
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredTickets.map((ticket) => (
-                <TableRow 
-                  key={ticket.id} 
-                  className="hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer transition-colors"
-                  onClick={() => handleRowClick(ticket)}
-                >
-                  <TableCell className="font-medium">{ticket.id}</TableCell>
-                  <TableCell>
-                    <div>
-                      <p className="font-medium text-slate-900 dark:text-[#F6F6F6] line-clamp-1">{ticket.title}</p>
-                      <div className="flex items-center space-x-3 mt-1">
-                        {ticket.responses > 0 && (
-                          <div className="flex items-center text-xs text-slate-500 dark:text-slate-400">
-                            <MessageSquare className="h-3 w-3 mr-1" />
-                            {ticket.responses}
-                          </div>
-                        )}
-                        {ticket.attachments > 0 && (
-                          <div className="flex items-center text-xs text-slate-500 dark:text-slate-400">
-                            <Paperclip className="h-3 w-3 mr-1" />
-                            {ticket.attachments}
-                          </div>
+              {filteredTickets.map((ticket) => {
+                const { isCritical, alertLevel } = useCriticalTimeAlerts(ticket);
+                const criticalStyles = getCriticalAlertStyles(alertLevel);
+                
+                return (
+                  <TableRow 
+                    key={ticket.id} 
+                    className={`hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer transition-colors ${
+                      isCritical ? criticalStyles.cardClass : ''
+                    }`}
+                    onClick={() => handleRowClick(ticket)}
+                  >
+                    <TableCell className="font-medium">
+                      <div className="flex items-center space-x-2">
+                        <span>{ticket.id}</span>
+                        {isCritical && (
+                          <CriticalTimeAlert ticket={ticket} showBadge={false} showIcon={true} />
                         )}
                       </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge className={`text-xs ${getStatusColor(ticket.status)}`}>
-                      {ticket.status}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Badge className={`text-xs ${getPriorityColor(ticket.priority)}`}>
-                      {getPriorityLabel(ticket.priority)}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    {getSectorBadge(ticket.sectorId)}
-                  </TableCell>
-                  <TableCell>{ticket.category}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center">
-                      <div className="w-6 h-6 bg-slate-200 dark:bg-slate-600 rounded-full flex items-center justify-center mr-2">
-                        <span className="text-slate-600 dark:text-slate-300 text-xs font-medium">
-                          {ticket.requester.split(' ').map(n => n[0]).join('')}
-                        </span>
+                    </TableCell>
+                    <TableCell>
+                      <div>
+                        <div className="flex items-start space-x-2">
+                          <p className="font-medium text-slate-900 dark:text-[#F6F6F6] line-clamp-1 flex-1">{ticket.title}</p>
+                          {isCritical && (
+                            <CriticalTimeAlert ticket={ticket} showBadge={true} showIcon={false} />
+                          )}
+                        </div>
+                        <div className="flex items-center space-x-3 mt-1">
+                          {ticket.responses > 0 && (
+                            <div className="flex items-center text-xs text-slate-500 dark:text-slate-400">
+                              <MessageSquare className="h-3 w-3 mr-1" />
+                              {ticket.responses}
+                            </div>
+                          )}
+                          {ticket.attachments > 0 && (
+                            <div className="flex items-center text-xs text-slate-500 dark:text-slate-400">
+                              <Paperclip className="h-3 w-3 mr-1" />
+                              {ticket.attachments}
+                            </div>
+                          )}
+                        </div>
                       </div>
-                      {ticket.requester}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    {ticket.assignee ? (
+                    </TableCell>
+                    <TableCell>
+                      <Badge className={`text-xs ${getStatusColor(ticket.status)}`}>
+                        {ticket.status}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Badge className={`text-xs ${getPriorityColor(ticket.priority)}`}>
+                        {getPriorityLabel(ticket.priority)}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      {getSectorBadge(ticket.sectorId)}
+                    </TableCell>
+                    <TableCell>{ticket.category}</TableCell>
+                    <TableCell>
                       <div className="flex items-center">
-                        <div className="w-6 h-6 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mr-2">
-                          <span className="text-blue-600 dark:text-blue-300 text-xs font-medium">
-                            {ticket.assignee.charAt(0).toUpperCase()}
+                        <div className="w-6 h-6 bg-slate-200 dark:bg-slate-600 rounded-full flex items-center justify-center mr-2">
+                          <span className="text-slate-600 dark:text-slate-300 text-xs font-medium">
+                            {ticket.requester.split(' ').map(n => n[0]).join('')}
                           </span>
                         </div>
-                        {ticket.assignee}
+                        {ticket.requester}
                       </div>
-                    ) : (
-                      <span className="text-slate-400 text-sm">Não atribuído</span>
-                    )}
-                  </TableCell>
-                  <TableCell className="text-sm text-slate-600 dark:text-slate-300">{ticket.createdAt}</TableCell>
-                  <TableCell className="text-sm text-slate-600 dark:text-slate-300">{ticket.updatedAt}</TableCell>
-                  <TableCell>
-                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                      <MoreHorizontal className="h-4 w-4" />
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
+                    </TableCell>
+                    <TableCell>
+                      {ticket.assignee ? (
+                        <div className="flex items-center">
+                          <div className="w-6 h-6 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mr-2">
+                            <span className="text-blue-600 dark:text-blue-300 text-xs font-medium">
+                              {ticket.assignee.charAt(0).toUpperCase()}
+                            </span>
+                          </div>
+                          {ticket.assignee}
+                        </div>
+                      ) : (
+                        <span className="text-slate-400 text-sm">Não atribuído</span>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-sm text-slate-600 dark:text-slate-300">{ticket.createdAt}</TableCell>
+                    <TableCell className="text-sm text-slate-600 dark:text-slate-300">{ticket.updatedAt}</TableCell>
+                    <TableCell>
+                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                        <MoreHorizontal className="h-4 w-4" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
         </div>

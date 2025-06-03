@@ -29,6 +29,8 @@ import { Input } from '@/components/ui/input';
 import { Clock, User, MessageSquare, Paperclip, AlertTriangle, Search, Filter } from 'lucide-react';
 import { TicketDetailModal } from './TicketDetailModal';
 import { SectorFilter } from './SectorFilter';
+import { CriticalTimeAlert } from './CriticalTimeAlert';
+import { useCriticalTimeAlerts, getCriticalAlertStyles } from '@/hooks/useCriticalTimeAlerts';
 
 interface TicketsKanbanProps {
   userRole: string;
@@ -72,6 +74,9 @@ const SortableTicketCard = ({ ticket, onClick, isDragOverlay = false }: Sortable
     transition,
     isDragging,
   } = useSortable({ id: ticket.id });
+
+  const { isCritical, alertLevel } = useCriticalTimeAlerts(ticket);
+  const criticalStyles = getCriticalAlertStyles(alertLevel);
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -123,18 +128,34 @@ const SortableTicketCard = ({ ticket, onClick, isDragOverlay = false }: Sortable
       {...listeners}
       className={`p-4 mb-3 cursor-grab active:cursor-grabbing hover:shadow-md transition-all duration-200 bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 ${
         isDragging ? 'shadow-lg ring-2 ring-blue-500 rotate-2' : ''
-      } ${isDragOverlay ? 'shadow-xl rotate-3 scale-105' : ''}`}
+      } ${isDragOverlay ? 'shadow-xl rotate-3 scale-105' : ''} ${
+        isCritical ? criticalStyles.cardClass : ''
+      }`}
       onClick={handleClick}
     >
       <div className="space-y-3">
         {/* Header */}
         <div className="flex items-start justify-between">
-          <span className="text-xs font-medium text-slate-500 dark:text-slate-400">{ticket.id}</span>
-          <Badge className={`text-xs ${getPriorityColor(ticket.priority)} flex items-center`}>
-            {getPriorityIcon(ticket.priority)}
-            {getPriorityLabel(ticket.priority)}
-          </Badge>
+          <div className="flex items-center space-x-2">
+            <span className="text-xs font-medium text-slate-500 dark:text-slate-400">{ticket.id}</span>
+            {isCritical && (
+              <CriticalTimeAlert ticket={ticket} showBadge={false} showIcon={true} />
+            )}
+          </div>
+          <div className="flex items-center space-x-1">
+            <Badge className={`text-xs ${getPriorityColor(ticket.priority)} flex items-center`}>
+              {getPriorityIcon(ticket.priority)}
+              {getPriorityLabel(ticket.priority)}
+            </Badge>
+          </div>
         </div>
+
+        {/* Critical Alert Badge */}
+        {isCritical && (
+          <div className="flex justify-start">
+            <CriticalTimeAlert ticket={ticket} showBadge={true} showIcon={false} />
+          </div>
+        )}
 
         {/* Title */}
         <h4 className="text-sm font-medium text-slate-900 dark:text-[#F6F6F6] line-clamp-2 leading-tight">

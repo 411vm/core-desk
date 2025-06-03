@@ -6,6 +6,8 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { CriticalTimeAlert } from './CriticalTimeAlert';
+import { useCriticalTimeAlerts, getCriticalAlertStyles } from '@/hooks/useCriticalTimeAlerts';
 
 interface Ticket {
   id: string;
@@ -103,38 +105,57 @@ export const TicketsListView = ({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {tickets.map((ticket) => (
-            <TableRow 
-              key={ticket.id}
-              className="hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer"
-              onClick={() => handleRowClick(ticket)}
-            >
-              <TableCell onClick={(e) => e.stopPropagation()}>
-                <Checkbox
-                  checked={selectedTickets.includes(ticket.id)}
-                  onCheckedChange={() => onTicketSelect(ticket.id)}
-                />
-              </TableCell>
-              <TableCell className="font-medium">{ticket.id}</TableCell>
-              <TableCell className="max-w-xs">
-                <div className="truncate">{ticket.title}</div>
-              </TableCell>
-              <TableCell>{ticket.requester}</TableCell>
-              <TableCell>
-                <Badge className={`text-xs ${getStatusColor(ticket.status)}`}>
-                  {ticket.status}
-                </Badge>
-              </TableCell>
-              <TableCell>
-                <Badge className={`text-xs ${getPriorityColor(ticket.priority)}`}>
-                  {getPriorityLabel(ticket.priority)}
-                </Badge>
-              </TableCell>
-              <TableCell className="text-sm text-slate-600 dark:text-slate-300">
-                {formatDate(ticket.updatedAt)}
-              </TableCell>
-            </TableRow>
-          ))}
+          {tickets.map((ticket) => {
+            const { isCritical, alertLevel } = useCriticalTimeAlerts(ticket);
+            const criticalStyles = getCriticalAlertStyles(alertLevel);
+            
+            return (
+              <TableRow 
+                key={ticket.id}
+                className={`hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer transition-colors ${
+                  isCritical ? criticalStyles.cardClass : ''
+                }`}
+                onClick={() => handleRowClick(ticket)}
+              >
+                <TableCell onClick={(e) => e.stopPropagation()}>
+                  <Checkbox
+                    checked={selectedTickets.includes(ticket.id)}
+                    onCheckedChange={() => onTicketSelect(ticket.id)}
+                  />
+                </TableCell>
+                <TableCell className="font-medium">
+                  <div className="flex items-center space-x-2">
+                    <span>{ticket.id}</span>
+                    {isCritical && (
+                      <CriticalTimeAlert ticket={ticket} showBadge={false} showIcon={true} />
+                    )}
+                  </div>
+                </TableCell>
+                <TableCell className="max-w-xs">
+                  <div className="space-y-1">
+                    <div className="truncate">{ticket.title}</div>
+                    {isCritical && (
+                      <CriticalTimeAlert ticket={ticket} showBadge={true} showIcon={false} />
+                    )}
+                  </div>
+                </TableCell>
+                <TableCell>{ticket.requester}</TableCell>
+                <TableCell>
+                  <Badge className={`text-xs ${getStatusColor(ticket.status)}`}>
+                    {ticket.status}
+                  </Badge>
+                </TableCell>
+                <TableCell>
+                  <Badge className={`text-xs ${getPriorityColor(ticket.priority)}`}>
+                    {getPriorityLabel(ticket.priority)}
+                  </Badge>
+                </TableCell>
+                <TableCell className="text-sm text-slate-600 dark:text-slate-300">
+                  {formatDate(ticket.updatedAt)}
+                </TableCell>
+              </TableRow>
+            );
+          })}
         </TableBody>
       </Table>
     </Card>
