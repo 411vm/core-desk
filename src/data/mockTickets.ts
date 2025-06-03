@@ -1,4 +1,3 @@
-
 export interface TicketResponse {
   id: string;
   author: string;
@@ -326,9 +325,16 @@ export const mockResponsesData: Record<string, TicketResponse[]> = {
 };
 
 export const getTicketById = (id: string): TicketDetail | null => {
-  return mockTicketsData[id] || null;
+  console.log('getTicketById called with ID:', id);
+  console.log('Available tickets:', Object.keys(mockTicketsData));
+  const ticket = mockTicketsData[id] || null;
+  console.log('Found ticket:', ticket);
+  return ticket;
 };
 
 export const getTicketResponses = (id: string): TicketResponse[] => {
-  return mockResponsesData[id] || [];
+  console.log('getTicketResponses called with ID:', id);
+  const responses = mockResponsesData[id] || [];
+  console.log('Found responses:', responses);
+  return responses;
 };

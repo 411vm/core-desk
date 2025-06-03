@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
@@ -17,21 +16,34 @@ const TicketView = () => {
   const [responses, setResponses] = useState<TicketResponse[]>([]);
   const [newResponse, setNewResponse] = useState('');
   const [isPrivate, setIsPrivate] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    console.log('TicketView: ID from params:', id);
+    
     if (id) {
       const ticketData = getTicketById(id);
       const ticketResponses = getTicketResponses(id);
+      
+      console.log('TicketView: Found ticket data:', ticketData);
+      console.log('TicketView: Found responses:', ticketResponses);
       
       if (ticketData) {
         setTicket(ticketData);
         setResponses(ticketResponses);
       } else {
-        // Se não encontrar o ticket, redireciona para 404
-        navigate('/404');
+        console.error('TicketView: Ticket not found for ID:', id);
+        toast({
+          title: "Chamado não encontrado",
+          description: "O chamado solicitado não foi encontrado.",
+          variant: "destructive"
+        });
+        navigate('/dashboard');
+        return;
       }
     }
-  }, [id, navigate]);
+    setLoading(false);
+  }, [id, navigate, toast]);
 
   const handleSendResponse = () => {
     if (!newResponse.trim()) return;
@@ -95,10 +107,28 @@ const TicketView = () => {
     }
   };
 
-  if (!ticket) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-slate-50 dark:bg-[#2b2d31] flex items-center justify-center">
         <div className="text-slate-600 dark:text-slate-300">Carregando chamado...</div>
+      </div>
+    );
+  }
+
+  if (!ticket) {
+    return (
+      <div className="min-h-screen bg-slate-50 dark:bg-[#2b2d31] flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold text-slate-900 dark:text-[#F6F6F6] mb-2">
+            Chamado não encontrado
+          </h2>
+          <p className="text-slate-600 dark:text-slate-300 mb-4">
+            O chamado solicitado não foi encontrado.
+          </p>
+          <Button onClick={() => navigate('/dashboard')}>
+            Voltar ao Dashboard
+          </Button>
+        </div>
       </div>
     );
   }
