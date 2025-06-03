@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
@@ -7,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { ArrowLeft, Clock, User, Building, Tag, MessageSquare, Send, Edit, FileText, Users } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { getTicketById, getTicketResponses, TicketResponse, TicketDetail, mockTicketsData } from '@/data/mockTickets';
+import { getPriorityColor, getPriorityLabel, getStatusColor, formatTicketId, addHashToId } from '@/utils/ticketHelpers';
 
 const TicketView = () => {
   const { id } = useParams<{ id: string }>();
@@ -26,15 +28,13 @@ const TicketView = () => {
     if (id) {
       console.log('TicketView: Processing ID:', id);
       
-      // Tentar buscar com o ID original primeiro
       let ticketData = getTicketById(id);
       let ticketResponses = getTicketResponses(id);
       
       console.log('TicketView: First attempt - Found ticket data:', ticketData);
       
-      // Se não encontrar, tentar com o # adicionado
       if (!ticketData) {
-        const idWithHash = `#${id}`;
+        const idWithHash = addHashToId(id);
         console.log('TicketView: Trying with hash:', idWithHash);
         ticketData = getTicketById(idWithHash);
         ticketResponses = getTicketResponses(idWithHash);
@@ -87,44 +87,16 @@ const TicketView = () => {
     });
   };
 
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'urgent': return 'bg-red-100 text-red-800 border-red-200';
-      case 'high': return 'bg-orange-100 text-orange-800 border-orange-200';
-      case 'medium': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'low': return 'bg-green-100 text-green-800 border-green-200';
-      default: return 'bg-gray-100 text-gray-800 border-gray-200';
-    }
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'Novo': return 'bg-blue-100 text-blue-800 border-blue-200';
-      case 'Em Andamento': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'Aguardando': return 'bg-orange-100 text-orange-800 border-orange-200';
-      case 'Resolvido': return 'bg-green-100 text-green-800 border-green-200';
-      default: return 'bg-gray-100 text-gray-800 border-gray-200';
-    }
-  };
-
-  const getPriorityLabel = (priority: string) => {
-    switch (priority) {
-      case 'urgent': return 'Urgente';
-      case 'high': return 'Alta';
-      case 'medium': return 'Média';
-      case 'low': return 'Baixa';
-      default: return 'Normal';
-    }
-  };
-
-  const getResponseTypeColor = (type: string, isPrivate: boolean) => {
+  const getResponseTypeColor = (type: string, isPrivate: boolean): string => {
     if (isPrivate) return 'border-l-orange-500 bg-orange-50';
-    switch (type) {
-      case 'customer': return 'border-l-blue-500 bg-blue-50';
-      case 'staff': return 'border-l-green-500 bg-green-50';
-      case 'system': return 'border-l-gray-500 bg-gray-50';
-      default: return 'border-l-gray-500 bg-gray-50';
-    }
+    
+    const colorMap: Record<string, string> = {
+      customer: 'border-l-blue-500 bg-blue-50',
+      staff: 'border-l-green-500 bg-green-50',
+      system: 'border-l-gray-500 bg-gray-50'
+    };
+    
+    return colorMap[type] || 'border-l-gray-500 bg-gray-50';
   };
 
   if (loading) {
@@ -156,7 +128,6 @@ const TicketView = () => {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-[#2b2d31]">
       <div className="max-w-6xl mx-auto px-4 py-6">
-        {/* Header */}
         <div className="mb-6">
           <Button 
             variant="ghost" 
@@ -174,7 +145,7 @@ const TicketView = () => {
                   <h1 className="text-2xl font-bold text-slate-900 dark:text-[#F6F6F6]">
                     {ticket.title}
                   </h1>
-                  <Badge className={`text-xs ${getStatusColor(ticket.status)}`}>
+                  <Badge className={`text-xs ${getStatusColor(ticket.status as any)}`}>
                     {ticket.status}
                   </Badge>
                   <Badge className={`text-xs ${getPriorityColor(ticket.priority)}`}>
@@ -185,7 +156,6 @@ const TicketView = () => {
                   Chamado {ticket.id} • Criado em {ticket.createdAt}
                 </p>
                 
-                {/* Badges de categoria e setor */}
                 <div className="flex items-center gap-2 mb-4">
                   <div className="flex items-center text-sm text-slate-600 dark:text-slate-300">
                     <FileText className="h-4 w-4 mr-1" />
@@ -201,14 +171,12 @@ const TicketView = () => {
                   </div>
                 </div>
 
-                {/* Descrição */}
                 <div className="mt-4 p-4 bg-slate-50 dark:bg-slate-700 rounded-lg">
                   <h3 className="font-medium text-slate-900 dark:text-[#F6F6F6] mb-2">Descrição</h3>
                   <p className="text-slate-700 dark:text-slate-300">{ticket.description}</p>
                 </div>
               </div>
               
-              {/* Ações rápidas */}
               <div className="flex flex-col gap-2">
                 <Button variant="outline" size="sm">
                   <Edit className="h-4 w-4 mr-2" />
@@ -217,7 +185,6 @@ const TicketView = () => {
               </div>
             </div>
 
-            {/* Informações principais */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6 pt-6 border-t border-slate-200 dark:border-slate-700">
               <div className="flex items-center space-x-2">
                 <User className="h-4 w-4 text-slate-500" />
@@ -257,7 +224,6 @@ const TicketView = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Histórico de respostas */}
           <div className="lg:col-span-2">
             <Card className="p-6">
               <h2 className="text-lg font-semibold text-slate-900 dark:text-[#F6F6F6] mb-4 flex items-center">
@@ -291,7 +257,6 @@ const TicketView = () => {
                 ))}
               </div>
 
-              {/* Campo de resposta */}
               <div className="mt-6 pt-6 border-t border-slate-200 dark:border-slate-700">
                 <h3 className="font-medium text-slate-900 dark:text-[#F6F6F6] mb-3">
                   Adicionar resposta
@@ -325,7 +290,6 @@ const TicketView = () => {
             </Card>
           </div>
 
-          {/* Sidebar com ações */}
           <div className="space-y-4">
             <Card className="p-4">
               <h3 className="font-medium text-slate-900 dark:text-[#F6F6F6] mb-3">

@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -7,35 +8,37 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { User, Clock, MessageSquare, Paperclip, Send } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { PriorityHelper } from './PriorityHelper';
-
-interface Ticket {
-  id: string;
-  title: string;
-  description: string;
-  priority: 'low' | 'medium' | 'high' | 'urgent';
-  category: string;
-  assignee: string;
-  requester: string;
-  createdAt: string;
-  responses: number;
-  attachments: number;
-  status: string;
-}
+import { BaseTicket, PriorityLevel, TicketStatus } from '@/types/ticket';
+import { getPriorityColor, getPriorityLabel, getStatusColor } from '@/utils/ticketHelpers';
 
 interface TicketDetailModalProps {
-  ticket: Ticket | null;
+  ticket: BaseTicket | null;
   isOpen: boolean;
   onClose: () => void;
-  onUpdateTicket: (ticketId: string, updates: Partial<Ticket>) => void;
+  onUpdateTicket: (ticketId: string, updates: Partial<BaseTicket>) => void;
 }
+
+const STATUS_OPTIONS = [
+  { value: 'Novo', label: 'Novo' },
+  { value: 'Em Andamento', label: 'Em Andamento' },
+  { value: 'Aguardando', label: 'Aguardando' },
+  { value: 'Resolvido', label: 'Resolvido' }
+] as const;
+
+const PRIORITY_OPTIONS = [
+  { value: 'low', label: 'Baixa' },
+  { value: 'medium', label: 'Média' },
+  { value: 'high', label: 'Alta' },
+  { value: 'urgent', label: 'Urgente' }
+] as const;
 
 export const TicketDetailModal = ({ ticket, isOpen, onClose, onUpdateTicket }: TicketDetailModalProps) => {
   const [response, setResponse] = useState('');
-  const [status, setStatus] = useState(ticket?.status || '');
-  const [priority, setPriority] = useState<'low' | 'medium' | 'high' | 'urgent'>(ticket?.priority || 'medium');
+  const [status, setStatus] = useState<string>('');
+  const [priority, setPriority] = useState<PriorityLevel>('medium');
   const { toast } = useToast();
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (ticket) {
       setStatus(ticket.status);
       setPriority(ticket.priority);
@@ -43,36 +46,6 @@ export const TicketDetailModal = ({ ticket, isOpen, onClose, onUpdateTicket }: T
   }, [ticket]);
 
   if (!ticket) return null;
-
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'urgent': return 'bg-red-100 text-red-800 border-red-200';
-      case 'high': return 'bg-orange-100 text-orange-800 border-orange-200';
-      case 'medium': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'low': return 'bg-green-100 text-green-800 border-green-200';
-      default: return 'bg-gray-100 text-gray-800 border-gray-200';
-    }
-  };
-
-  const getPriorityLabel = (priority: string) => {
-    switch (priority) {
-      case 'urgent': return 'Urgente';
-      case 'high': return 'Alta';
-      case 'medium': return 'Média';
-      case 'low': return 'Baixa';
-      default: return 'Normal';
-    }
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'Novo': return 'bg-blue-100 text-blue-800 border-blue-200';
-      case 'Em Andamento': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'Aguardando': return 'bg-orange-100 text-orange-800 border-orange-200';
-      case 'Resolvido': return 'bg-green-100 text-green-800 border-green-200';
-      default: return 'bg-gray-100 text-gray-800 border-gray-200';
-    }
-  };
 
   const handleSave = () => {
     if (response.trim()) {
@@ -82,7 +55,7 @@ export const TicketDetailModal = ({ ticket, isOpen, onClose, onUpdateTicket }: T
       });
     }
 
-    const updates: Partial<Ticket> = {};
+    const updates: Partial<BaseTicket> = {};
     if (status !== ticket.status) {
       updates.status = status;
     }
@@ -102,20 +75,6 @@ export const TicketDetailModal = ({ ticket, isOpen, onClose, onUpdateTicket }: T
     onClose();
   };
 
-  const statusOptions = [
-    { value: 'Novo', label: 'Novo' },
-    { value: 'Em Andamento', label: 'Em Andamento' },
-    { value: 'Aguardando', label: 'Aguardando' },
-    { value: 'Resolvido', label: 'Resolvido' }
-  ];
-
-  const priorityOptions = [
-    { value: 'low', label: 'Baixa' },
-    { value: 'medium', label: 'Média' },
-    { value: 'high', label: 'Alta' },
-    { value: 'urgent', label: 'Urgente' }
-  ];
-
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -126,7 +85,7 @@ export const TicketDetailModal = ({ ticket, isOpen, onClose, onUpdateTicket }: T
               <Badge className={`text-xs ${getPriorityColor(priority)}`}>
                 {getPriorityLabel(priority)}
               </Badge>
-              <Badge className={`text-xs ${getStatusColor(status)}`}>
+              <Badge className={`text-xs ${getStatusColor(status as TicketStatus)}`}>
                 {status}
               </Badge>
             </div>
@@ -134,13 +93,11 @@ export const TicketDetailModal = ({ ticket, isOpen, onClose, onUpdateTicket }: T
         </DialogHeader>
 
         <div className="space-y-6">
-          {/* Ticket Info */}
           <div className="space-y-4">
             <div>
               <h3 className="font-semibold text-lg mb-2">{ticket.title}</h3>
               <p className="text-slate-600 dark:text-slate-300">{ticket.description}</p>
               
-              {/* Priority Helper */}
               <PriorityHelper 
                 description={ticket.description}
                 onPrioritySuggestion={setPriority}
@@ -186,7 +143,6 @@ export const TicketDetailModal = ({ ticket, isOpen, onClose, onUpdateTicket }: T
             )}
           </div>
 
-          {/* Status and Priority Updates */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <label className="text-sm font-medium">Status do Chamado</label>
@@ -195,7 +151,7 @@ export const TicketDetailModal = ({ ticket, isOpen, onClose, onUpdateTicket }: T
                   <SelectValue placeholder="Selecione o status" />
                 </SelectTrigger>
                 <SelectContent>
-                  {statusOptions.map((option) => (
+                  {STATUS_OPTIONS.map((option) => (
                     <SelectItem key={option.value} value={option.value}>
                       {option.label}
                     </SelectItem>
@@ -206,12 +162,12 @@ export const TicketDetailModal = ({ ticket, isOpen, onClose, onUpdateTicket }: T
 
             <div className="space-y-2">
               <label className="text-sm font-medium">Prioridade</label>
-              <Select value={priority} onValueChange={(value: 'low' | 'medium' | 'high' | 'urgent') => setPriority(value)}>
+              <Select value={priority} onValueChange={(value: PriorityLevel) => setPriority(value)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione a prioridade" />
                 </SelectTrigger>
                 <SelectContent>
-                  {priorityOptions.map((option) => (
+                  {PRIORITY_OPTIONS.map((option) => (
                     <SelectItem key={option.value} value={option.value}>
                       {option.label}
                     </SelectItem>
@@ -221,7 +177,6 @@ export const TicketDetailModal = ({ ticket, isOpen, onClose, onUpdateTicket }: T
             </div>
           </div>
 
-          {/* Response */}
           <div className="space-y-2">
             <label className="text-sm font-medium">Responder ao Cliente</label>
             <Textarea

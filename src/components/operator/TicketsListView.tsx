@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
@@ -8,28 +9,14 @@ import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { CriticalTimeAlert } from './CriticalTimeAlert';
 import { useCriticalTimeAlerts, getCriticalAlertStyles } from '@/hooks/useCriticalTimeAlerts';
-
-interface Ticket {
-  id: string;
-  title: string;
-  description: string;
-  priority: 'low' | 'medium' | 'high' | 'urgent';
-  category: string;
-  assignee: string;
-  requester: string;
-  createdAt: string;
-  responses: number;
-  attachments: number;
-  status: string;
-  hasCustomerReply: boolean;
-  updatedAt: string;
-}
+import { BaseTicket } from '@/types/ticket';
+import { getPriorityColor, getPriorityLabel, getStatusColor, formatTicketId } from '@/utils/ticketHelpers';
 
 interface TicketsListViewProps {
-  tickets: Ticket[];
+  tickets: BaseTicket[];
   selectedTickets: string[];
   onTicketSelect: (ticketId: string) => void;
-  onTicketClick: (ticket: Ticket) => void;
+  onTicketClick: (ticket: BaseTicket) => void;
   onSelectAll: () => void;
 }
 
@@ -42,37 +29,7 @@ export const TicketsListView = ({
 }: TicketsListViewProps) => {
   const navigate = useNavigate();
 
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'urgent': return 'bg-red-100 text-red-800 border-red-200';
-      case 'high': return 'bg-orange-100 text-orange-800 border-orange-200';
-      case 'medium': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'low': return 'bg-green-100 text-green-800 border-green-200';
-      default: return 'bg-gray-100 text-gray-800 border-gray-200';
-    }
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'Novo': return 'bg-blue-100 text-blue-800 border-blue-200';
-      case 'Em Andamento': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'Aguardando': return 'bg-orange-100 text-orange-800 border-orange-200';
-      case 'Resolvido': return 'bg-green-100 text-green-800 border-green-200';
-      default: return 'bg-gray-100 text-gray-800 border-gray-200';
-    }
-  };
-
-  const getPriorityLabel = (priority: string) => {
-    switch (priority) {
-      case 'urgent': return 'Urgente';
-      case 'high': return 'Alta';
-      case 'medium': return 'Média';
-      case 'low': return 'Baixa';
-      default: return 'Normal';
-    }
-  };
-
-  const formatDate = (dateString: string) => {
+  const formatDate = (dateString: string): string => {
     try {
       const date = new Date(dateString);
       return formatDistanceToNow(date, { addSuffix: true, locale: ptBR });
@@ -81,8 +38,9 @@ export const TicketsListView = ({
     }
   };
 
-  const handleRowClick = (ticket: Ticket) => {
-    navigate(`/chamados/${ticket.id}`);
+  const handleRowClick = (ticket: BaseTicket) => {
+    const ticketId = formatTicketId(ticket.id);
+    navigate(`/chamados/${ticketId}`);
   };
 
   return (
@@ -141,7 +99,7 @@ export const TicketsListView = ({
                 </TableCell>
                 <TableCell>{ticket.requester}</TableCell>
                 <TableCell>
-                  <Badge className={`text-xs ${getStatusColor(ticket.status)}`}>
+                  <Badge className={`text-xs ${getStatusColor(ticket.status as any)}`}>
                     {ticket.status}
                   </Badge>
                 </TableCell>
