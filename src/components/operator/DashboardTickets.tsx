@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -32,6 +33,8 @@ interface Ticket {
 }
 
 export const DashboardTickets = ({ userRole }: DashboardTicketsProps) => {
+  const navigate = useNavigate();
+  
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'cards' | 'list'>(() => {
@@ -131,8 +134,7 @@ export const DashboardTickets = ({ userRole }: DashboardTicketsProps) => {
   });
 
   const handleTicketClick = (ticket: Ticket) => {
-    setSelectedTicket(ticket);
-    setIsModalOpen(true);
+    navigate(`/ticket/${ticket.id}`);
   };
 
   const handleUpdateTicket = (ticketId: string, updates: Partial<Ticket>) => {

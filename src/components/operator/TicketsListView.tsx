@@ -1,5 +1,5 @@
-
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -38,6 +38,8 @@ export const TicketsListView = ({
   onTicketClick,
   onSelectAll 
 }: TicketsListViewProps) => {
+  const navigate = useNavigate();
+
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case 'urgent': return 'bg-red-100 text-red-800 border-red-200';
@@ -77,6 +79,10 @@ export const TicketsListView = ({
     }
   };
 
+  const handleRowClick = (ticket: Ticket) => {
+    navigate(`/ticket/${ticket.id}`);
+  };
+
   return (
     <Card className="p-4">
       <Table>
@@ -101,7 +107,7 @@ export const TicketsListView = ({
             <TableRow 
               key={ticket.id}
               className="hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer"
-              onClick={() => onTicketClick(ticket)}
+              onClick={() => handleRowClick(ticket)}
             >
               <TableCell onClick={(e) => e.stopPropagation()}>
                 <Checkbox
