@@ -7,102 +7,31 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { ArrowLeft, Clock, User, Building, Tag, MessageSquare, Send, Edit, FileText, Users } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-
-interface TicketResponse {
-  id: string;
-  author: string;
-  content: string;
-  timestamp: string;
-  type: 'customer' | 'staff' | 'system';
-  isPrivate: boolean;
-}
-
-interface Ticket {
-  id: string;
-  title: string;
-  description: string;
-  priority: 'low' | 'medium' | 'high' | 'urgent';
-  category: string;
-  assignee: string;
-  requester: string;
-  createdAt: string;
-  responses: number;
-  attachments: number;
-  status: string;
-  hasCustomerReply: boolean;
-  updatedAt: string;
-  sector: string;
-}
+import { getTicketById, getTicketResponses, TicketResponse, TicketDetail } from '@/data/mockTickets';
 
 const TicketView = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [ticket, setTicket] = useState<Ticket | null>(null);
+  const [ticket, setTicket] = useState<TicketDetail | null>(null);
   const [responses, setResponses] = useState<TicketResponse[]>([]);
   const [newResponse, setNewResponse] = useState('');
   const [isPrivate, setIsPrivate] = useState(false);
 
-  // Mock data - in real app this would come from API
   useEffect(() => {
     if (id) {
-      // Simulate fetching ticket data
-      const mockTicket: Ticket = {
-        id: id,
-        title: 'Problema com acesso ao email',
-        description: 'Não consigo acessar minha conta de email desde ontem. Aparece uma mensagem de erro quando tento fazer login.',
-        priority: 'high',
-        category: 'Email',
-        assignee: 'João Silva',
-        requester: 'Maria Santos',
-        createdAt: '2024-01-15 14:30',
-        responses: 3,
-        attachments: 1,
-        status: 'Em Andamento',
-        hasCustomerReply: true,
-        updatedAt: '2024-01-15 16:30',
-        sector: 'Suporte N1'
-      };
-
-      const mockResponses: TicketResponse[] = [
-        {
-          id: '1',
-          author: 'Maria Santos',
-          content: 'Não consigo acessar minha conta de email desde ontem. Aparece uma mensagem de erro quando tento fazer login.',
-          timestamp: '2024-01-15 14:30',
-          type: 'customer',
-          isPrivate: false
-        },
-        {
-          id: '2',
-          author: 'João Silva',
-          content: 'Olá Maria, vou verificar sua conta de email. Pode me informar qual é a mensagem de erro exata que aparece?',
-          timestamp: '2024-01-15 15:00',
-          type: 'staff',
-          isPrivate: false
-        },
-        {
-          id: '3',
-          author: 'Sistema',
-          content: 'Chamado atribuído ao setor Suporte N1',
-          timestamp: '2024-01-15 15:01',
-          type: 'system',
-          isPrivate: false
-        },
-        {
-          id: '4',
-          author: 'Maria Santos',
-          content: 'A mensagem é: "Erro de autenticação. Verifique suas credenciais."',
-          timestamp: '2024-01-15 16:30',
-          type: 'customer',
-          isPrivate: false
-        }
-      ];
-
-      setTicket(mockTicket);
-      setResponses(mockResponses);
+      const ticketData = getTicketById(id);
+      const ticketResponses = getTicketResponses(id);
+      
+      if (ticketData) {
+        setTicket(ticketData);
+        setResponses(ticketResponses);
+      } else {
+        // Se não encontrar o ticket, redireciona para 404
+        navigate('/404');
+      }
     }
-  }, [id]);
+  }, [id, navigate]);
 
   const handleSendResponse = () => {
     if (!newResponse.trim()) return;
@@ -220,6 +149,12 @@ const TicketView = () => {
                       {ticket.sector}
                     </span>
                   </div>
+                </div>
+
+                {/* Descrição */}
+                <div className="mt-4 p-4 bg-slate-50 dark:bg-slate-700 rounded-lg">
+                  <h3 className="font-medium text-slate-900 dark:text-[#F6F6F6] mb-2">Descrição</h3>
+                  <p className="text-slate-700 dark:text-slate-300">{ticket.description}</p>
                 </div>
               </div>
               
