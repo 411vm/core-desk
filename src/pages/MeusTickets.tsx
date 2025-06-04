@@ -21,7 +21,8 @@ import {
   Clock, 
   Eye,
   ArrowRight,
-  Plus
+  Plus,
+  ArrowLeft
 } from 'lucide-react';
 
 // Mock data expandido
@@ -187,6 +188,10 @@ const MeusTickets = () => {
     setCurrentPage(1);
   }, [searchQuery, statusFilter, setorFilter, tipoFilter, priorityFilter]);
 
+  const handleBackToDashboard = () => {
+    window.location.href = '/customer-dashboard';
+  };
+
   return (
     <div className="min-h-screen bg-slate-50">
       <Navbar />
@@ -195,13 +200,23 @@ const MeusTickets = () => {
         <div className="max-w-7xl mx-auto px-4 py-8">
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
-            <div>
-              <h1 className="text-2xl font-bold text-slate-900 mb-2">
-                Meus Chamados
-              </h1>
-              <p className="text-slate-600">
-                Acompanhe todos os seus chamados em um só lugar
-              </p>
+            <div className="flex items-center space-x-4">
+              <Button 
+                variant="outline" 
+                onClick={handleBackToDashboard}
+                className="flex items-center"
+              >
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Voltar
+              </Button>
+              <div>
+                <h1 className="text-2xl font-bold text-slate-900 mb-2">
+                  Meus Chamados
+                </h1>
+                <p className="text-slate-600">
+                  Acompanhe todos os seus chamados em um só lugar
+                </p>
+              </div>
             </div>
             <Button onClick={() => window.location.href = '/abrir-chamado'}>
               <Plus className="mr-2 h-4 w-4" />
