@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
@@ -8,13 +7,15 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { ArrowLeft, Save, FileText, Bold, Italic, List, Link, Paperclip, Eye, EyeOff } from 'lucide-react';
+import { ClientSearchInput } from '@/components/ui/client-search-input';
+import { Client } from '@/hooks/useClientSearch';
 
 const CreateTicket = () => {
   const navigate = useNavigate();
   const [isDraft, setIsDraft] = useState(false);
   const [isPublic, setIsPublic] = useState(true);
+  const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [ticketData, setTicketData] = useState({
-    client: '',
     subject: '',
     priority: 'medium',
     type: 'problem',
@@ -32,8 +33,18 @@ const CreateTicket = () => {
   ];
 
   const handleSave = (saveAsDraft = false) => {
-    console.log('Salvando chamado:', { ...ticketData, isDraft: saveAsDraft, isPublic });
-    // Aqui você salvaria o chamado
+    if (!selectedClient && !saveAsDraft) {
+      alert('Por favor, selecione um cliente válido antes de criar o chamado.');
+      return;
+    }
+
+    console.log('Salvando chamado:', { 
+      ...ticketData, 
+      client: selectedClient,
+      isDraft: saveAsDraft, 
+      isPublic 
+    });
+    
     if (!saveAsDraft) {
       navigate('/dashboard?section=tickets');
     }
@@ -108,19 +119,27 @@ const CreateTicket = () => {
             </h3>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
+              <div className="md:col-span-2">
                 <Label htmlFor="client">Cliente *</Label>
-                <Input
-                  id="client"
-                  value={ticketData.client}
-                  onChange={(e) => setTicketData(prev => ({ ...prev, client: e.target.value }))}
-                  placeholder="Nome do cliente ou empresa"
-                  className="mt-1"
+                <ClientSearchInput
+                  value={selectedClient}
+                  onChange={setSelectedClient}
+                  placeholder="Digite o nome do cliente ou CNPJ..."
                   required
+                  className="mt-1"
                 />
+                {selectedClient && (
+                  <div className="mt-2 p-2 bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 rounded-md">
+                    <p className="text-sm text-green-800 dark:text-green-300">
+                      ✅ Cliente selecionado: <strong>{selectedClient.name}</strong>
+                      <br />
+                      <span className="text-xs">CNPJ: {selectedClient.cnpj}</span>
+                    </p>
+                  </div>
+                )}
               </div>
               
-              <div>
+              <div className="md:col-span-2">
                 <Label htmlFor="subject">Assunto *</Label>
                 <Input
                   id="subject"
