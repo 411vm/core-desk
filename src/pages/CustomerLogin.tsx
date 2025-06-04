@@ -36,7 +36,7 @@ const CustomerLogin = () => {
         loginTime: new Date().toISOString()
       }));
       
-      navigate('/dashboard');
+      navigate('/customer-dashboard');
     } else {
       setError('Usuário ou senha incorretos');
     }
