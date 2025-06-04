@@ -1,10 +1,11 @@
 
 import React from 'react';
 import { Navbar } from '@/components/Navbar';
-import { KnowledgeBase } from '@/components/KnowledgeBase';
-import { QuickTicketActions } from '@/components/customer/QuickTicketActions';
-import { MyTicketsOverview } from '@/components/customer/MyTicketsOverview';
-import { ActivityFeed } from '@/components/customer/ActivityFeed';
+import { HelpCenter } from '@/components/customer/HelpCenter';
+import { QuickStats } from '@/components/customer/QuickStats';
+import { CompactTicketActions } from '@/components/customer/CompactTicketActions';
+import { CompactMyTickets } from '@/components/customer/CompactMyTickets';
+import { CompactActivityFeed } from '@/components/customer/CompactActivityFeed';
 
 const CustomerDashboard = () => {
   // Verificar se o usuário está logado como cliente
@@ -22,37 +23,53 @@ const CustomerDashboard = () => {
       <Navbar />
       
       <main className="pt-16">
-        {/* Header de boas-vindas */}
-        <section className="bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-700 text-white py-12">
+        {/* Header mais limpo */}
+        <section className="bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-700 text-white py-8">
           <div className="max-w-7xl mx-auto px-4">
-            <div className="text-center">
-              <h1 className="text-3xl md:text-4xl font-bold mb-4">
-                Bem-vindo, {customer.username}!
-              </h1>
-              <p className="text-lg text-blue-100 max-w-2xl mx-auto">
-                Central de atendimento do CoreDesk. Aqui você pode abrir chamados, 
-                consultar nossa base de conhecimento e acompanhar suas solicitações.
-              </p>
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-2xl md:text-3xl font-bold mb-2">
+                  Olá, {customer.username}! 👋
+                </h1>
+                <p className="text-blue-100">
+                  Como podemos ajudar você hoje?
+                </p>
+              </div>
+              <div className="hidden md:block">
+                <div className="text-right">
+                  <p className="text-sm text-blue-200">Status do Sistema</p>
+                  <div className="flex items-center space-x-2 mt-1">
+                    <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                    <span className="text-sm font-medium">Operacional</span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </section>
 
         <div className="max-w-7xl mx-auto px-4 py-8">
-          {/* Ações rápidas para abertura de chamados */}
-          <QuickTicketActions />
+          {/* Estatísticas rápidas */}
+          <QuickStats />
 
-          {/* Base de Conhecimento */}
-          <KnowledgeBase />
+          {/* Central de Ajuda - Seção principal */}
+          <HelpCenter />
 
-          <div className="grid lg:grid-cols-2 gap-8">
+          {/* Layout em grid para widgets */}
+          <div className="grid lg:grid-cols-3 gap-6">
+            {/* Abrir Chamado */}
+            <div>
+              <CompactTicketActions />
+            </div>
+
             {/* Meus Chamados */}
             <div>
-              <MyTicketsOverview />
+              <CompactMyTickets />
             </div>
 
             {/* Feed de Atividades */}
             <div>
-              <ActivityFeed />
+              <CompactActivityFeed />
             </div>
           </div>
         </div>
