@@ -44,9 +44,9 @@ export const CompactTicketActions = () => {
 
   return (
     <Card>
-      <CardContent className="p-6">
-        <div className="text-center mb-6">
-          <h3 className="text-lg font-semibold text-slate-900 mb-2">
+      <CardContent className="p-4">
+        <div className="mb-4">
+          <h3 className="text-lg font-semibold text-slate-900 mb-1">
             Abrir Novo Chamado
           </h3>
           <p className="text-sm text-slate-600">
@@ -54,29 +54,30 @@ export const CompactTicketActions = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-2 mb-3">
           {ticketCategories.map((category) => {
             const IconComponent = category.icon;
             return (
               <Button
                 key={category.id}
                 variant="ghost"
-                className={`h-auto p-4 flex-col space-y-2 ${category.color} transition-colors`}
+                className={`h-auto p-3 flex-col space-y-1 ${category.color} transition-colors`}
                 onClick={() => handleCategoryClick(category.id)}
               >
-                <IconComponent className="h-6 w-6" />
-                <span className="text-sm font-medium">{category.title}</span>
+                <IconComponent className="h-5 w-5" />
+                <span className="text-xs font-medium">{category.title}</span>
               </Button>
             );
           })}
         </div>
 
         <Button 
-          className="w-full mt-4" 
+          className="w-full" 
+          size="sm"
           onClick={() => window.location.href = '/create-ticket'}
         >
           <Plus className="mr-2 h-4 w-4" />
-          Abrir Chamado Personalizado
+          Chamado Personalizado
         </Button>
       </CardContent>
     </Card>

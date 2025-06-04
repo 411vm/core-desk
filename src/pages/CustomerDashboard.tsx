@@ -41,25 +41,25 @@ const CustomerDashboard = () => {
           {/* Estatísticas rápidas */}
           <QuickStats />
 
-          {/* Abrir Chamado - Seção principal prioritária */}
-          <div className="mb-8">
-            <CompactTicketActions />
-          </div>
-
-          {/* Layout em grid para widgets */}
+          {/* Grid principal: Abrir Chamado e Meus Chamados lado a lado */}
           <div className="grid lg:grid-cols-2 gap-6 mb-8">
+            {/* Abrir Chamado - Seção compacta */}
+            <div>
+              <CompactTicketActions />
+            </div>
+
             {/* Meus Chamados */}
             <div>
               <CompactMyTickets />
             </div>
-
-            {/* Feed de Atividades */}
-            <div>
-              <CompactActivityFeed />
-            </div>
           </div>
 
-          {/* Central de Ajuda - Seção complementar */}
+          {/* Feed de Atividades - Largura total */}
+          <div className="mb-8">
+            <CompactActivityFeed />
+          </div>
+
+          {/* Central de Ajuda - Com artigos recentes */}
           <HelpCenter />
         </div>
       </main>
