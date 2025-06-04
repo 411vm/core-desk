@@ -7,18 +7,8 @@ import { Badge } from '@/components/ui/badge';
 import { 
   Search, 
   MessageSquare, 
-  BookOpen, 
-  HelpCircle,
-  TrendingUp,
-  ExternalLink
+  HelpCircle
 } from 'lucide-react';
-
-const popularArticles = [
-  { id: 1, title: 'Como resetar minha senha', category: 'Acesso', views: 342 },
-  { id: 2, title: 'Configurar VPN corporativa', category: 'Rede', views: 198 },
-  { id: 3, title: 'Política de backup', category: 'Segurança', views: 156 },
-  { id: 4, title: 'Solicitar novo equipamento', category: 'Hardware', views: 134 }
-];
 
 const categories = [
   { name: 'Acesso', count: 23, color: 'bg-blue-100 text-blue-700' },
@@ -41,19 +31,19 @@ export const HelpCenter = () => {
   };
 
   return (
-    <section className="mb-8">
-      <div className="text-center mb-8">
-        <h2 className="text-2xl font-bold text-slate-900 mb-3">
-          Central de Ajuda
+    <section>
+      <div className="text-center mb-6">
+        <h2 className="text-xl font-bold text-slate-900 mb-2">
+          Base de Conhecimento
         </h2>
-        <p className="text-slate-600 max-w-2xl mx-auto">
+        <p className="text-slate-600">
           Encontre respostas rápidas ou converse com nossa IA especializada
         </p>
       </div>
 
       {/* Search Bar */}
       <Card className="mb-6">
-        <CardContent className="p-6">
+        <CardContent className="p-4">
           <form onSubmit={handleSearch} className="flex gap-3">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 h-4 w-4" />
@@ -75,70 +65,32 @@ export const HelpCenter = () => {
         </CardContent>
       </Card>
 
-      <div className="grid lg:grid-cols-3 gap-6">
-        {/* Popular Articles */}
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <TrendingUp className="mr-2 h-5 w-5 text-blue-600" />
-              Artigos Populares
-            </CardTitle>
-            <CardDescription>
-              Soluções mais acessadas pelos usuários
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {popularArticles.map((article) => (
-                <div key={article.id} className="flex items-center justify-between p-3 rounded-lg hover:bg-slate-50 cursor-pointer transition-colors">
-                  <div className="flex items-center space-x-3">
-                    <BookOpen className="h-4 w-4 text-slate-400" />
-                    <div>
-                      <h4 className="font-medium text-slate-900">{article.title}</h4>
-                      <div className="flex items-center space-x-2 mt-1">
-                        <Badge variant="outline" className="text-xs">
-                          {article.category}
-                        </Badge>
-                        <span className="text-xs text-slate-500">
-                          {article.views} visualizações
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                  <ExternalLink className="h-4 w-4 text-slate-400" />
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Categories */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <HelpCircle className="mr-2 h-5 w-5 text-purple-600" />
-              Categorias
-            </CardTitle>
-            <CardDescription>
-              Navegue por tópicos
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {categories.map((category) => (
-                <div key={category.name} className="flex items-center justify-between p-3 rounded-lg hover:bg-slate-50 cursor-pointer transition-colors">
-                  <span className="font-medium text-slate-900">
-                    {category.name}
-                  </span>
-                  <Badge className={category.color}>
-                    {category.count} artigos
-                  </Badge>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      {/* Categories */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center text-lg">
+            <HelpCircle className="mr-2 h-5 w-5 text-purple-600" />
+            Navegue por Categorias
+          </CardTitle>
+          <CardDescription>
+            Encontre soluções organizadas por tópicos
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            {categories.map((category) => (
+              <div key={category.name} className="flex flex-col items-center p-4 rounded-lg hover:bg-slate-50 cursor-pointer transition-colors border border-slate-200">
+                <Badge className={`${category.color} mb-2`}>
+                  {category.count} artigos
+                </Badge>
+                <span className="font-medium text-slate-900 text-sm text-center">
+                  {category.name}
+                </span>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
     </section>
   );
 };
