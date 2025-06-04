@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { DarkModeProvider } from "@/hooks/useDarkMode";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
+import CustomerLogin from "./pages/CustomerLogin";
 import Dashboard from "./pages/Dashboard";
 import Notifications from "./pages/Notifications";
 import Profile from "./pages/Profile";
@@ -28,6 +29,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/customer-login" element={<CustomerLogin />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/notifications" element={<Notifications />} />
             <Route path="/profile" element={<Profile />} />
