@@ -51,6 +51,7 @@ interface Ticket {
   attachments: number;
   description: string;
   sectorId?: string;
+  hasCustomerReply: boolean;
 }
 
 interface Sector {
@@ -293,7 +294,8 @@ export const TicketsKanban = ({ userRole, prefilterStatus }: TicketsKanbanProps)
       responses: 0,
       attachments: 1,
       description: 'Não consigo acessar minha conta de email desde ontem',
-      sectorId: '1'
+      sectorId: '1',
+      hasCustomerReply: false
     },
     {
       id: '#2024-002',
@@ -308,7 +310,8 @@ export const TicketsKanban = ({ userRole, prefilterStatus }: TicketsKanbanProps)
       responses: 0,
       attachments: 0,
       description: 'Preciso instalar o Adobe Reader para abrir documentos PDF',
-      sectorId: '1'
+      sectorId: '1',
+      hasCustomerReply: false
     },
     {
       id: '#2024-003',
@@ -323,7 +326,8 @@ export const TicketsKanban = ({ userRole, prefilterStatus }: TicketsKanbanProps)
       responses: 2,
       attachments: 2,
       description: 'Meu computador está travando várias vezes ao dia',
-      sectorId: '2'
+      sectorId: '2',
+      hasCustomerReply: true
     },
     {
       id: '#2024-004',
@@ -338,7 +342,8 @@ export const TicketsKanban = ({ userRole, prefilterStatus }: TicketsKanbanProps)
       responses: 1,
       attachments: 0,
       description: 'Esqueci a senha do sistema ERP',
-      sectorId: '4'
+      sectorId: '4',
+      hasCustomerReply: false
     },
     {
       id: '#2024-005',
@@ -353,7 +358,8 @@ export const TicketsKanban = ({ userRole, prefilterStatus }: TicketsKanbanProps)
       responses: 3,
       attachments: 1,
       description: 'Nova impressora não está sendo reconhecida',
-      sectorId: '5'
+      sectorId: '5',
+      hasCustomerReply: false
     }
   ]);
 
