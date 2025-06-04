@@ -13,6 +13,7 @@ import CustomerDashboard from "./pages/CustomerDashboard";
 import Notifications from "./pages/Notifications";
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
+import AdminB2B from "./pages/AdminB2B";
 import Reports from "./pages/Reports";
 import CreateTicket from "./pages/CreateTicket";
 import AbrirChamado from "./pages/AbrirChamado";
@@ -38,6 +39,7 @@ const App = () => (
             <Route path="/notifications" element={<Notifications />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/settings" element={<Settings />} />
+            <Route path="/admin" element={<AdminB2B />} />
             <Route path="/reports" element={<Reports />} />
             <Route path="/create-ticket" element={<CreateTicket />} />
             <Route path="/abrir-chamado" element={<AbrirChamado />} />
