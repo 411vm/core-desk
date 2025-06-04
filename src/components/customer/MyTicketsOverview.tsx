@@ -9,7 +9,8 @@ import {
   AlertCircle, 
   Eye,
   MessageSquare,
-  ArrowRight
+  ArrowRight,
+  Plus
 } from 'lucide-react';
 
 // Mock data - em produção viria do backend filtrado por usuário
