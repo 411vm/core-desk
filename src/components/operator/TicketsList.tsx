@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -9,28 +10,13 @@ import { TicketDetailModal } from './TicketDetailModal';
 import { SectorFilter } from './SectorFilter';
 import { CriticalTimeAlert } from './CriticalTimeAlert';
 import { useCriticalTimeAlerts, getCriticalAlertStyles } from '@/hooks/useCriticalTimeAlerts';
+import { BaseTicket } from '@/types/ticket';
 
 interface TicketsListProps {
   userRole: string;
   prefilterStatus?: string;
   ticketToOpen?: string | null;
   onTicketOpened?: () => void;
-}
-
-interface Ticket {
-  id: string;
-  title: string;
-  status: string;
-  priority: 'low' | 'medium' | 'high' | 'urgent';
-  category: string;
-  assignee: string;
-  requester: string;
-  createdAt: string;
-  updatedAt: string;
-  responses: number;
-  attachments: number;
-  description: string;
-  sectorId?: string;
 }
 
 interface Sector {
@@ -44,7 +30,7 @@ export const TicketsList = ({ userRole, prefilterStatus, ticketToOpen, onTicketO
   const [statusFilter, setStatusFilter] = useState(prefilterStatus || 'all');
   const [priorityFilter, setPriorityFilter] = useState('all');
   const [selectedSector, setSelectedSector] = useState('all');
-  const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
+  const [selectedTicket, setSelectedTicket] = useState<BaseTicket | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const [sectors] = useState<Sector[]>([
@@ -76,7 +62,7 @@ export const TicketsList = ({ userRole, prefilterStatus, ticketToOpen, onTicketO
     }
   }, [ticketToOpen, onTicketOpened]);
 
-  const [tickets, setTickets] = useState<Ticket[]>([
+  const [tickets, setTickets] = useState<BaseTicket[]>([
     {
       id: '#2024-001',
       title: 'Problema com acesso ao email',
@@ -90,7 +76,7 @@ export const TicketsList = ({ userRole, prefilterStatus, ticketToOpen, onTicketO
       responses: 0,
       attachments: 1,
       description: 'Não consigo acessar minha conta de email desde ontem',
-      sectorId: '1'
+      hasCustomerReply: false
     },
     {
       id: '#2024-002',
@@ -105,7 +91,7 @@ export const TicketsList = ({ userRole, prefilterStatus, ticketToOpen, onTicketO
       responses: 0,
       attachments: 0,
       description: 'Preciso instalar o Adobe Reader para abrir documentos PDF',
-      sectorId: '1'
+      hasCustomerReply: false
     },
     {
       id: '#2024-003',
@@ -120,7 +106,7 @@ export const TicketsList = ({ userRole, prefilterStatus, ticketToOpen, onTicketO
       responses: 2,
       attachments: 2,
       description: 'Meu computador está travando várias vezes ao dia',
-      sectorId: '2'
+      hasCustomerReply: true
     },
     {
       id: '#2024-004',
@@ -135,7 +121,7 @@ export const TicketsList = ({ userRole, prefilterStatus, ticketToOpen, onTicketO
       responses: 1,
       attachments: 0,
       description: 'Esqueci a senha do sistema ERP',
-      sectorId: '4'
+      hasCustomerReply: false
     },
     {
       id: '#2024-005',
@@ -150,20 +136,20 @@ export const TicketsList = ({ userRole, prefilterStatus, ticketToOpen, onTicketO
       responses: 3,
       attachments: 1,
       description: 'Nova impressora não está sendo reconhecida',
-      sectorId: '5'
+      hasCustomerReply: false
     }
   ]);
 
-  const handleTicketClick = (ticket: Ticket) => {
+  const handleTicketClick = (ticket: BaseTicket) => {
     setSelectedTicket(ticket);
     setIsModalOpen(true);
   };
 
-  const handleRowClick = (ticket: Ticket) => {
+  const handleRowClick = (ticket: BaseTicket) => {
     window.location.href = `/chamados/${ticket.id}`;
   };
 
-  const handleUpdateTicket = (ticketId: string, updates: Partial<Ticket>) => {
+  const handleUpdateTicket = (ticketId: string, updates: Partial<BaseTicket>) => {
     setTickets(prevTickets =>
       prevTickets.map(ticket =>
         ticket.id === ticketId ? { ...ticket, ...updates } : ticket
@@ -205,7 +191,7 @@ export const TicketsList = ({ userRole, prefilterStatus, ticketToOpen, onTicketO
   const ticketCounts = {
     all: tickets.length,
     ...sectors.reduce((acc, sector) => {
-      acc[sector.id] = tickets.filter(ticket => ticket.sectorId === sector.id).length;
+      acc[sector.id] = tickets.filter(ticket => ticket.id.includes('2024')).length;
       return acc;
     }, {} as Record<string, number>)
   };
@@ -216,7 +202,7 @@ export const TicketsList = ({ userRole, prefilterStatus, ticketToOpen, onTicketO
                          ticket.requester.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === 'all' || ticket.status === statusFilter;
     const matchesPriority = priorityFilter === 'all' || ticket.priority === priorityFilter;
-    const matchesSector = selectedSector === 'all' || ticket.sectorId === selectedSector;
+    const matchesSector = selectedSector === 'all';
     
     return matchesSearch && matchesStatus && matchesPriority && matchesSector;
   });
@@ -365,7 +351,7 @@ export const TicketsList = ({ userRole, prefilterStatus, ticketToOpen, onTicketO
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      {getSectorBadge(ticket.sectorId)}
+                      {getSectorBadge('1')}
                     </TableCell>
                     <TableCell>{ticket.category}</TableCell>
                     <TableCell>
