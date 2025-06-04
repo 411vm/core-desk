@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Navbar } from '@/components/Navbar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -6,6 +5,15 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { 
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from '@/components/ui/pagination';
 import { 
   Search, 
   Filter, 
@@ -115,6 +123,8 @@ const MeusTickets = () => {
   const [tipoFilter, setTipoFilter] = useState('');
   const [priorityFilter, setPriorityFilter] = useState('');
   const [selectedTicket, setSelectedTicket] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 10;
 
   // Verificar se o usuário está logado como cliente
   const customerData = localStorage.getItem('coredesk_customer');
@@ -148,6 +158,12 @@ const MeusTickets = () => {
     return matchesSearch && matchesStatus && matchesSetor && matchesTipo && matchesPriority;
   });
 
+  // Pagination logic
+  const totalPages = Math.ceil(filteredTickets.length / ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const endIndex = startIndex + ITEMS_PER_PAGE;
+  const currentTickets = filteredTickets.slice(startIndex, endIndex);
+
   const handleViewTicket = (ticketId: string) => {
     window.location.href = `/chamados/${ticketId}`;
   };
@@ -158,7 +174,18 @@ const MeusTickets = () => {
     setSetorFilter('');
     setTipoFilter('');
     setPriorityFilter('');
+    setCurrentPage(1);
   };
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Reset to first page when filters change
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, statusFilter, setorFilter, tipoFilter, priorityFilter]);
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -264,9 +291,23 @@ const MeusTickets = () => {
             </CardContent>
           </Card>
 
-          {/* Lista de Chamados */}
-          <div className="space-y-4">
-            {filteredTickets.map((ticket) => (
+          {/* Results Summary */}
+          {filteredTickets.length > 0 && (
+            <div className="mb-4 flex items-center justify-between text-sm text-slate-600">
+              <span>
+                Mostrando {startIndex + 1}-{Math.min(endIndex, filteredTickets.length)} de {filteredTickets.length} chamado(s)
+              </span>
+              {totalPages > 1 && (
+                <span>
+                  Página {currentPage} de {totalPages}
+                </span>
+              )}
+            </div>
+          )}
+
+          {/* Lista de Chamados - Cards Compactos */}
+          <div className="space-y-3">
+            {currentTickets.map((ticket) => (
               <Card 
                 key={ticket.id}
                 className={`cursor-pointer hover:shadow-md transition-all ${
@@ -274,40 +315,40 @@ const MeusTickets = () => {
                 } ${selectedTicket === ticket.id ? 'border-blue-500 shadow-lg' : ''}`}
                 onClick={() => handleViewTicket(ticket.id)}
               >
-                <CardContent className="p-6">
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex items-center space-x-3">
-                      <span className="font-mono text-sm font-medium text-slate-600">
+                <CardContent className="p-4">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-center space-x-2">
+                      <span className="font-mono text-xs font-medium text-slate-600">
                         #{ticket.id}
                       </span>
                       {ticket.hasNewReply && (
-                        <Badge className="bg-blue-100 text-blue-700">
+                        <Badge className="bg-blue-100 text-blue-700 text-xs px-2 py-0.5">
                           Nova resposta
                         </Badge>
                       )}
                     </div>
                     <div className="flex items-center space-x-2">
-                      <Badge className={`text-xs ${getStatusColor(ticket.status)}`}>
+                      <Badge className={`text-xs px-2 py-0.5 ${getStatusColor(ticket.status)}`}>
                         {ticket.status}
                       </Badge>
-                      <Badge className={`text-xs ${getPriorityColor(ticket.priority)}`}>
+                      <Badge className={`text-xs px-2 py-0.5 ${getPriorityColor(ticket.priority)}`}>
                         {ticket.priority}
                       </Badge>
                     </div>
                   </div>
 
-                  <h3 className="text-lg font-semibold text-slate-900 mb-2">
+                  <h3 className="text-base font-semibold text-slate-900 mb-2 line-clamp-1">
                     {ticket.title}
                   </h3>
                   
-                  <p className="text-slate-600 mb-4 line-clamp-2">
+                  <p className="text-sm text-slate-600 mb-3 line-clamp-1">
                     {ticket.description}
                   </p>
 
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-4 text-sm text-slate-500">
+                    <div className="flex items-center space-x-3 text-xs text-slate-500">
                       <div className="flex items-center">
-                        <Clock className="h-4 w-4 mr-1" />
+                        <Clock className="h-3 w-3 mr-1" />
                         {new Date(ticket.lastUpdate).toLocaleDateString('pt-BR')}
                       </div>
                       <span>•</span>
@@ -315,16 +356,89 @@ const MeusTickets = () => {
                       <span>•</span>
                       <span>{ticket.setor} - {ticket.tipo}</span>
                     </div>
-                    <Button variant="ghost" size="sm">
-                      <Eye className="mr-2 h-4 w-4" />
+                    <Button variant="ghost" size="sm" className="h-8 px-3 text-xs">
+                      <Eye className="mr-1 h-3 w-3" />
                       Visualizar
-                      <ArrowRight className="ml-2 h-4 w-4" />
+                      <ArrowRight className="ml-1 h-3 w-3" />
                     </Button>
                   </div>
                 </CardContent>
               </Card>
             ))}
           </div>
+
+          {/* Paginação */}
+          {totalPages > 1 && (
+            <div className="mt-8 flex justify-center">
+              <Pagination>
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious 
+                      href="#"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        if (currentPage > 1) handlePageChange(currentPage - 1);
+                      }}
+                      className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                    />
+                  </PaginationItem>
+                  
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
+                    // Show first page, last page, current page, and pages around current
+                    const showPage = page === 1 || 
+                                   page === totalPages || 
+                                   Math.abs(page - currentPage) <= 1;
+                    
+                    if (!showPage) {
+                      // Show ellipsis for gaps
+                      if (page === 2 && currentPage > 4) {
+                        return (
+                          <PaginationItem key={page}>
+                            <PaginationEllipsis />
+                          </PaginationItem>
+                        );
+                      }
+                      if (page === totalPages - 1 && currentPage < totalPages - 3) {
+                        return (
+                          <PaginationItem key={page}>
+                            <PaginationEllipsis />
+                          </PaginationItem>
+                        );
+                      }
+                      return null;
+                    }
+
+                    return (
+                      <PaginationItem key={page}>
+                        <PaginationLink
+                          href="#"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handlePageChange(page);
+                          }}
+                          isActive={currentPage === page}
+                          className="cursor-pointer"
+                        >
+                          {page}
+                        </PaginationLink>
+                      </PaginationItem>
+                    );
+                  })}
+                  
+                  <PaginationItem>
+                    <PaginationNext 
+                      href="#"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        if (currentPage < totalPages) handlePageChange(currentPage + 1);
+                      }}
+                      className={currentPage === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            </div>
+          )}
 
           {filteredTickets.length === 0 && (
             <Card>
