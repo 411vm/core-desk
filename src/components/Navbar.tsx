@@ -33,7 +33,6 @@ export const Navbar = () => {
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-4">
             <Button variant="ghost" size="sm">Meus Chamados</Button>
-            <Button variant="ghost" size="sm">Central de TI</Button>
             <Button variant="ghost" size="sm" className="relative">
               <Bell className="h-4 w-4" />
               <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">2</span>
@@ -68,7 +67,6 @@ export const Navbar = () => {
                 </div>
               </div>
               <Button variant="ghost" className="w-full justify-start">Meus Chamados</Button>
-              <Button variant="ghost" className="w-full justify-start">Central de TI</Button>
               <Button variant="ghost" className="w-full justify-start">Notificações</Button>
               <Button variant="ghost" className="w-full justify-start">Perfil</Button>
             </div>

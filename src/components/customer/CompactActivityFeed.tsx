@@ -72,7 +72,7 @@ const formatTimeAgo = (timestamp: string) => {
 
 export const CompactActivityFeed = () => {
   const handleViewTicket = (ticketId: string) => {
-    window.location.href = `/chamados/${ticketId}`;
+    window.location.href = `/meus-chamados?chamado=${ticketId}`;
   };
 
   return (

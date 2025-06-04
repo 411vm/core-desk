@@ -57,7 +57,7 @@ export const CompactMyTickets = () => {
   const [expanded, setExpanded] = useState(false);
   
   const handleViewTicket = (ticketId: string) => {
-    window.location.href = `/chamados/${ticketId}`;
+    window.location.href = `/meus-chamados?chamado=${ticketId}`;
   };
 
   const handleViewAll = () => {
@@ -147,7 +147,7 @@ export const CompactMyTickets = () => {
             <p className="text-sm text-slate-500 mb-3">
               Nenhum chamado encontrado
             </p>
-            <Button size="sm" onClick={() => window.location.href = '/create-ticket'}>
+            <Button size="sm" onClick={() => window.location.href = '/abrir-chamado'}>
               Abrir Primeiro Chamado
             </Button>
           </div>

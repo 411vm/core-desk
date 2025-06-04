@@ -15,6 +15,8 @@ import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
 import Reports from "./pages/Reports";
 import CreateTicket from "./pages/CreateTicket";
+import AbrirChamado from "./pages/AbrirChamado";
+import MeusTickets from "./pages/MeusTickets";
 import TicketView from "./pages/TicketView";
 import NotFound from "./pages/NotFound";
 
@@ -38,6 +40,8 @@ const App = () => (
             <Route path="/settings" element={<Settings />} />
             <Route path="/reports" element={<Reports />} />
             <Route path="/create-ticket" element={<CreateTicket />} />
+            <Route path="/abrir-chamado" element={<AbrirChamado />} />
+            <Route path="/meus-chamados" element={<MeusTickets />} />
             <Route path="/chamados/:id" element={<TicketView />} />
             <Route path="/404" element={<NotFound />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

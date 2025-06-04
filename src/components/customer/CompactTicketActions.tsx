@@ -39,7 +39,7 @@ const ticketCategories = [
 
 export const CompactTicketActions = () => {
   const handleCategoryClick = (categoryId: string) => {
-    window.location.href = `/create-ticket?categoria=${categoryId}`;
+    window.location.href = `/abrir-chamado?categoria=${categoryId}`;
   };
 
   return (
@@ -74,10 +74,10 @@ export const CompactTicketActions = () => {
         <Button 
           className="w-full" 
           size="sm"
-          onClick={() => window.location.href = '/create-ticket'}
+          onClick={() => window.location.href = '/abrir-chamado'}
         >
           <Plus className="mr-2 h-4 w-4" />
-          Chamado Personalizado
+          Abrir novo chamado
         </Button>
       </CardContent>
     </Card>
