@@ -75,12 +75,16 @@ export const CompactActivityFeed = () => {
     window.location.href = `/meus-chamados?chamado=${ticketId}`;
   };
 
+  const handleViewAll = () => {
+    window.location.href = '/meus-chamados';
+  };
+
   return (
     <Card>
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg">Atividades Recentes</CardTitle>
-          <Button variant="ghost" size="sm">
+          <Button variant="ghost" size="sm" onClick={handleViewAll}>
             Ver Todas
             <ArrowRight className="ml-1 h-4 w-4" />
           </Button>

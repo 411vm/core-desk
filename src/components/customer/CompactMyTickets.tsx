@@ -147,7 +147,7 @@ export const CompactMyTickets = () => {
             <p className="text-sm text-slate-500 mb-3">
               Nenhum chamado encontrado
             </p>
-            <Button size="sm" onClick={() => window.location.href = '/abrir-chamado'}>
+            <Button size="sm" onClick={() => window.location.href = '/meus-chamados'}>
               Abrir Primeiro Chamado
             </Button>
           </div>
