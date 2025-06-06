@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -10,15 +10,80 @@ import { ArrowLeft, User, Mail, Phone, Calendar, MapPin, Save } from 'lucide-rea
 const Profile = () => {
   const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
+  const [userType, setUserType] = useState<'admin' | 'operator' | 'customer' | null>(null);
   const [userData, setUserData] = useState({
-    name: 'João Silva',
-    email: 'joao.silva@coredesk.com',
-    phone: '(11) 99999-9999',
-    department: 'Suporte Técnico',
-    role: 'Operador',
-    joinDate: '15/03/2023',
-    location: 'São Paulo, SP'
+    name: '',
+    email: '',
+    phone: '',
+    department: '',
+    role: '',
+    joinDate: '',
+    location: ''
   });
+
+  useEffect(() => {
+    // Verificar qual tipo de usuário está logado
+    const customerData = localStorage.getItem('coredesk_customer');
+    const operatorData = localStorage.getItem('coredesk_user');
+    
+    if (customerData) {
+      const customer = JSON.parse(customerData);
+      setUserType('customer');
+      setUserData({
+        name: customer.username || 'Cliente',
+        email: customer.email || 'cliente@empresa.com',
+        phone: '(11) 99999-9999',
+        department: 'Cliente',
+        role: 'Cliente',
+        joinDate: '15/03/2023',
+        location: 'São Paulo, SP'
+      });
+    } else if (operatorData) {
+      const operator = JSON.parse(operatorData);
+      if (operator.role === 'admin') {
+        setUserType('admin');
+        setUserData({
+          name: operator.username || 'Administrador',
+          email: 'admin@coredesk.com',
+          phone: '(11) 99999-9999',
+          department: 'Administração',
+          role: 'Administrador',
+          joinDate: '01/01/2023',
+          location: 'São Paulo, SP'
+        });
+      } else {
+        setUserType('operator');
+        setUserData({
+          name: operator.username || 'Operador',
+          email: 'operador@coredesk.com',
+          phone: '(11) 99999-9999',
+          department: 'Suporte Técnico',
+          role: operator.role === 'manager' ? 'Gestor' : 'Operador',
+          joinDate: '15/03/2023',
+          location: 'São Paulo, SP'
+        });
+      }
+    } else {
+      // Se não há usuário logado, redirecionar para login
+      navigate('/');
+    }
+  }, [navigate]);
+
+  const handleBack = () => {
+    switch (userType) {
+      case 'admin':
+        navigate('/admin');
+        break;
+      case 'operator':
+        navigate('/dashboard');
+        break;
+      case 'customer':
+        navigate('/customer-dashboard');
+        break;
+      default:
+        navigate('/');
+    }
+  };
 
   const handleSave = () => {
     // Aqui você salvaria os dados
@@ -26,13 +91,21 @@ const Profile = () => {
     console.log('Dados salvos:', userData);
   };
 
+  if (!userType) {
+    return (
+      <div className="min-h-screen bg-slate-50 dark:bg-[#2b2d31] flex items-center justify-center">
+        <div className="text-slate-600 dark:text-slate-400">Carregando...</div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-[#2b2d31]">
       <div className="max-w-4xl mx-auto p-6">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center space-x-4">
-            <Button variant="ghost" onClick={() => navigate('/dashboard')}>
+            <Button variant="ghost" onClick={handleBack}>
               <ArrowLeft className="h-4 w-4 mr-2" />
               Voltar
             </Button>
