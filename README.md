@@ -66,3 +66,4 @@ Simply open [Lovable](https://lovable.dev/projects/4978a6e7-c592-4842-8c53-39007
 
 ## Ultimas atualizações
 - criado tela de admin login, cliente login, portal admin, portal cliente.
+- - 
